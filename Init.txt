@@ -5,8 +5,9 @@
 1.0			// Y_max
 -1.0		// Z_min
 1.0			// Z_max
-1000000		// Maximum of particle
-100			// Particle on 1 length
+10000000	// Maximum of particle
+10			// Particle on 1 length
 0.1			//	h
 1.0e-3		// tau
 0.2			// Time end
+0.1			// Time interval to output in files
