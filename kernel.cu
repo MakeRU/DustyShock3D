@@ -79,6 +79,8 @@ __global__ void RhoKernel(double* x, double* y, double* z, double* rho, double* 
 	}
 }
 
+
+
 __device__ __host__ double Eq_State(double rho, double e, int Type_of_state, double Gam_g, double Speed_of_sound_gas)
 {
 	//	return B*(pow(rho,Gam_liq)-1) + 1;
@@ -112,11 +114,85 @@ __global__ void PKernel(double* rho, double* p, double* e, int* Ind, int Pm, int
 
 }
 
+
+__global__ void ForceInitKernel(double* Ax, double* Ay, double* Az, int* Ind, int Pm)
+{
+
+	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
+	if (i > Pm) return;
+
+	if (Ind[i] == 0 )
+	{
+		Ax[i] = 0.0;
+		Ay[i] = 0.0;
+		Az[i] = 0.0;
+	}
+}
+
+
+__global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, double* p_gas, double* mas, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, int* Cell, int* Nn, int Pm, double Clx, double Cly, double Clz, double Clh, int Cnx, int Cny, int Cl, double h, double Gam_g, double alpha, double beta, double eps, int k, int l, int g)
+{
+
+	int j, Ni, Ci;
+	double d, F_nu, nu1x, nu1y, nu1z, dist, A, F_tens, Cnu;
+
+	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
+	if (i > Pm) return;
+
+	if (Ind[i] == 0)
+	{
+		Ni = int((x[i] - Clx) / Clh) + (int((y[i] - Cly) / Clh)) * Cnx + (int((z[i] - Clz) / Clh)) * Cnx * Cny;
+		Ci = Ni + k + l * Cnx + g * Cnx * Cny;
+		if ((Ci > -1) && (Ci < Cl))
+		{
+			j = Cell[Ci];
+
+			while (j > -1)
+			{
+				dist = pow((x[j] - x[i]) * (x[j] - x[i]) + (y[j] - y[i]) * (y[j] - y[i]) + (z[j] - z[i]) * (z[j] - z[i]), 0.5);
+				if ((dist < 2 * h) && (dist > 0))
+				{
+
+					// Исск. вязкость
+
+					F_nu = 0;
+					nu1x = (Vx[i] - Vx[j]) * (x[i] - x[j]);
+					nu1y = (Vy[i] - Vy[j]) * (y[i] - y[j]);
+					nu1z = (Vz[i] - Vz[j]) * (z[i] - z[j]);
+					if ((nu1x < 0) && (nu1y < 0) && (nu1z < 0))
+					{
+						Cnu = 0.5 * (sqrt(Gam_g * p_gas[i] / rho_gas[i]) + sqrt(Gam_g * p_gas[j] / rho_gas[j]));
+						nu1x = h * nu1x / (dist *dist + eps * h * h);
+						F_nu = (-alpha * Cnu * nu1x + beta * nu1x * nu1x) / (0.5 * (rho_gas[i] + rho_gas[j])); 
+					}
+
+				//	F_tens = kapp * mas[j] * dist * W(dist, h0);
+					A = mas[j] * (p_gas[i] / (rho_gas[i] * rho_gas[i]) + p_gas[j] / (rho_gas[j] * rho_gas[j]) + F_nu) * dW(dist, h);
+					d = (x[j] - x[i]);
+					Ax[i] = Ax[i] + d * A / dist;
+					d = (y[j] - y[i]);
+					Ay[i] = Ay[i] + d * A / dist;
+					d = (z[j] - z[i]);
+					Az[i] = Az[i] + d * A / dist;
+				}
+
+
+
+				j = Nn[j];
+			}
+		}
+
+
+	}
+}
+
+
 void Data_out(int num)
 {
 	FILE* out_file_gas, * out_file_dust, * out_file;
 	char out_name[25];
 	int i, j, l;
+	double r;
 
 
 	if (num < 10000000) { sprintf(out_name, "Data/G%d.dat", num); };
@@ -130,14 +206,15 @@ void Data_out(int num)
 	out_file_gas = fopen(out_name, "wt");
 	fprintf(out_file_gas, "t=%5.3f \n", Tm);
 	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-	fprintf(out_file_gas, "x \t mas \t rho \t p \t Vx \t Vy \t Vz \t Ax \t Ay \t Az \t e \t Ind \n");
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t Ax \t Ay \t Az \t e \t Ind \n");
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if ((x_gas[i] >= 0.0) && (x_gas[i] <= 1.0))
+	//	if ((x_gas[i] >= 0.0) && (x_gas[i] <= 1.0))
 		{
-			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-				x_gas[i], mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+			r = sqrt(x_gas[i]* x_gas[i] + y_gas[i]*y_gas[i]+ z_gas[i]*z_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
 		}
 
 	}
@@ -145,6 +222,8 @@ void Data_out(int num)
 	fclose(out_file_gas);
 
 }
+
+
 
 
 int main()
@@ -164,9 +243,12 @@ int main()
 	fgets(s, 128, ini_file); sscanf(s, "%d", &Maximum_particle);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &Particle_on_length);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &h);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &h_cell);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &tau);
-	fgets(s, 128, ini_file); sscanf(s, "%lf", &tau);
-	fgets(s, 128, ini_file); sscanf(s, "%lf", &tau);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &T_end);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &T_out);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &alpha);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &beta);
 
 
 /*	fgets(s, 128, ini_file);	sscanf(s, "%lf", &Zm);
@@ -179,7 +261,7 @@ int main()
 	fgets(s, 128, ini_file);	sscanf(s, "%d", &Te);
 	fgets(s, 128, ini_file);	sscanf(s, "%d", &File_int);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &Geps);
-	fgets(s, 128, ini_file); sscanf(s, "%lf", &alfa);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &alpha);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &beta);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &eps);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &sigm);	
@@ -245,15 +327,19 @@ int main()
 				x_temp = X_min + (double) (i * dlh);
 				y_temp = Y_min + (double) (j * dlh);
 				z_temp = Z_min + (double) (k * dlh);
-
+				if (x_temp * x_temp + y_temp * y_temp + z_temp * z_temp <= 1.0) {};
 				p = p + 1;
 				x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
 				y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
 				z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
-				mas_gas[p] = 1.0 / Particle_on_length;
+				mas_gas[p] = 1.0 / (Particle_on_length* Particle_on_length*Particle_on_length);
 				Vx_gas[p] = 0.0;
 				Vy_gas[p] = 0.0;
 				Vz_gas[p] = 0.0;
+				Ax_gas[p] = 0.0;
+				Ay_gas[p] = 0.0;
+				Az_gas[p] = 0.0;
+				e_gas[p] = 2.5;
 				Ind_gas[p] = 0;
 			}
 
@@ -280,7 +366,10 @@ int main()
 	cudaMalloc((void**)&dev_Cell, (Cl) * sizeof(int));
 	cudaMalloc((void**)&dev_Nn, (Maximum_particle + 1) * sizeof(int));
 	
-	
+	// cudaMemcpyToSymbol(&Gam_g, &Gam_g, sizeof(double), cudaMemcpyHostToDevice);
+
+
+
 	dim3 gridSize = dim3(Pm / 256 + 1, 1, 1);
 	dim3 blockSize = dim3(16, 16, 1);
 
@@ -312,7 +401,7 @@ int main()
 		for (p = 0; p <= Pm; p++)
 		{
 			i = int((x_gas[p] - Clx) / Clh) + (int((y_gas[p] - Cly) / Clh)) * Cnx + (int((z_gas[p] - Clz) / Clh)) * Cnx * Cny;
-			if ((i > 0) && (i < Cl))
+			if ((i >= 0) && (i <= Cl))
 			{
 				if (Cell[i] == -1) { Cell[i] = p; Ne[i] = p; Nn[p] = -1; }
 				else { Nn[Ne[i]] = p; Ne[i] = p; Nn[p] = -1; };
@@ -326,6 +415,7 @@ int main()
 		cudaMemcpy(dev_rho_gas, rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_p_gas, p_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_mas_gas, mas_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_e_gas, e_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Vx_gas, Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Vy_gas, Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Vz_gas, Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
@@ -352,12 +442,29 @@ int main()
 		cudaDeviceSynchronize();
 
 
+		ForceInitKernel <<<gridSize, blockSize >>> (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, Pm);
+		cudaDeviceSynchronize();
+
+		for (k = -1; k <= 1; k++)
+			for (l = -1; l <= 1; l++)
+				for (g = -1; g <= 1; g++)
+				{
+					ForceKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, Gam_g, alpha, beta, eps, k, l, g);
+					cudaDeviceSynchronize();
+				}
+
+
+
+
+
+
 		cudaMemcpy(x_gas, dev_x_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(y_gas, dev_y_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(z_gas, dev_z_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(rho_gas, dev_rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(p_gas, dev_p_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(mas_gas, dev_mas_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(e_gas, dev_e_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Vx_gas, dev_Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Vy_gas, dev_Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Vz_gas, dev_Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
@@ -373,6 +480,9 @@ int main()
 		}
 
 	} while (Tm < T_end);
+	
+	Data_out(out_num);
+	out_num = out_num + 1;
 
     return 0;
 }

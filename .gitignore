@@ -340,3 +340,4 @@ ASALocalRun/
 healthchecksdb
 /Data/G0000000.dat
 /Data/G0000001.dat
+*.dat

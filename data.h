@@ -21,6 +21,9 @@ double Speed_of_sound_gas;
 
 int Type_of_state;
 
+// Artificially viscosity
+
+double alpha, beta, eps;
 
 // Cells to find particle
 int * Ne, * Nc, * Cell, * Nn;
@@ -29,6 +32,8 @@ double Clx, Cly, Clz, Cmx, Cmy, Cmz, Clh; //
 
 
 // Dust
+
+double h_cell;
 
 // File
 int out_num; // Number of output file
@@ -52,6 +57,10 @@ int* dev_Ind_gas = 0;
 int* dev_Nn; // Номер следующей
 int* dev_Nc; // Номер ячейки в которой частица
 int* dev_Cell; // Номер ячейки
+
+// GPU variables
+
+
 
 // Other variables
 
