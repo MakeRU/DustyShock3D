@@ -186,13 +186,37 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 	}
 }
 
+__global__ void MoveKernel(double* x, double* y, double* z, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, double tau, int Pm)
+{
+
+	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
+
+	if (i > Pm) return;
+
+	if (Ind[i] == 0)
+	{
+		Vx[i] = Vx[i] + Ax[i] * tau;
+		Vy[i] = Vy[i] + Ay[i] * tau;
+		Vz[i] = Vz[i] + Az[i] * tau;
+
+
+		x[i] = x[i] + Vx[i] * tau;
+		y[i] = y[i] + Vy[i]*tau;
+		z[i] = z[i] + Vz[i]*tau;
+
+
+	}
+
+}
+
+
 
 void Data_out(int num)
 {
 	FILE* out_file_gas, * out_file_dust, * out_file;
 	char out_name[25];
 	int i, j, l;
-	double r;
+	double r,v;
 
 
 	if (num < 10000000) { sprintf(out_name, "Data/G%d.dat", num); };
@@ -213,8 +237,9 @@ void Data_out(int num)
 	//	if ((x_gas[i] >= 0.0) && (x_gas[i] <= 1.0))
 		{
 			r = sqrt(x_gas[i]* x_gas[i] + y_gas[i]*y_gas[i]+ z_gas[i]*z_gas[i]);
-			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
 		}
 
 	}
@@ -327,7 +352,7 @@ int main()
 				x_temp = X_min + (double) (i * dlh);
 				y_temp = Y_min + (double) (j * dlh);
 				z_temp = Z_min + (double) (k * dlh);
-				if (x_temp * x_temp + y_temp * y_temp + z_temp * z_temp <= 1.0) {};
+				if (x_temp * x_temp + y_temp * y_temp + z_temp * z_temp <= 1.0) {
 				p = p + 1;
 				x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
 				y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
@@ -340,7 +365,10 @@ int main()
 				Ay_gas[p] = 0.0;
 				Az_gas[p] = 0.0;
 				e_gas[p] = 2.5;
+				p_gas[p] = 1.0;
+				rho_gas[p] = 1.0;
 				Ind_gas[p] = 0;
+				};
 			}
 
 	Pr = p;
@@ -383,7 +411,7 @@ int main()
 	do
 	{
 		Tm = Tm + tau;
-		printf("Time %5.3lf mks \n", Tm * 1e3);
+		printf("Time %5.3lf \n", Tm);
 
 
 		// Allocation particled to cells
@@ -454,7 +482,8 @@ int main()
 				}
 
 
-
+		MoveKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, tau, Pm);
+		cudaDeviceSynchronize();
 
 
 
@@ -481,8 +510,6 @@ int main()
 
 	} while (Tm < T_end);
 	
-	Data_out(out_num);
-	out_num = out_num + 1;
 
     return 0;
 }

@@ -6,11 +6,11 @@
 -1.0		// Z_min
 1.0			// Z_max
 10000000	// Maximum of particle
-10			// Particle on 1 length
+20			// Particle on 1 length
 0.1			//	h
 0.5			// h_cell / h0
 5.0e-3		// tau
 0.2			// Time end
-0.1			// Time interval to output in files
+0.01			// Time interval to output in files
 1.0			// alfa
 2.0			// beta
