@@ -249,14 +249,152 @@ void Data_out(int num)
 
 	fclose(out_file_gas);
 
+	if (num < 10000000) { sprintf(out_name, "Data/L%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L000000%d.dat", num); };
+
+	out_file_gas = fopen(out_name, "wt");
+	fprintf(out_file_gas, "t=%5.3f \n", Tm);
+	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+	for (i = 0; i <= Pm; i++)
+	{
+		if ((y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i] <= h*h))
+		{
+			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
+			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+		}
+
+	}
+
+	fclose(out_file_gas);
+
+
+
 }
 
 
 
+void init_Ball()
+{
+	 double x_temp, y_temp, z_temp;
+	 
+	p = -1;
+	Im = int((X_max - X_min) * Particle_on_length);
+	Jm = int((Y_max - Y_min) * Particle_on_length);
+	Km = int((Z_max - Z_min) * Particle_on_length);
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = X_min + (double)(i * dlh);
+				y_temp = Y_min + (double)(j * dlh);
+				z_temp = Z_min + (double)(k * dlh);
+				if (x_temp * x_temp + y_temp * y_temp + z_temp * z_temp <= 1.0) {
+				p = p + 1;
+				x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+				y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+				z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+				mas_gas[p] = 1.0 / (Particle_on_length * Particle_on_length * Particle_on_length);
+				Vx_gas[p] = 0.0;
+				Vy_gas[p] = 0.0;
+				Vz_gas[p] = 0.0;
+				Ax_gas[p] = 0.0;
+				Ay_gas[p] = 0.0;
+				Az_gas[p] = 0.0;
+				e_gas[p] = 2.5;
+				p_gas[p] = 1.0;
+				rho_gas[p] = 1.0;
+				Ind_gas[p] = 0;
+				};
+			}
+
+	Pr = p;
+
+	Pm = p;
+}
+
+void init_Sod_X()
+{
+	double x_temp, y_temp, z_temp;
+	double p_left, p_right, e_left, e_right, rho_left, rho_right;
+	
+	p = -1;
+	Im = int((X_max - X_min) * Particle_on_length);
+	Jm = int((Y_max - Y_min) * Particle_on_length);
+	Km = int((Z_max - Z_min) * Particle_on_length);
+
+	p_left = 1.0;
+	p_right = 0.1;
+	e_left = 2.5;
+	e_right = 2.0;
+	rho_left = Eq_State1(p_left, e_left, 0, 1.4, 1.0);
+	rho_right = Eq_State1(p_right, e_right, 0, 1.4, 1.0);
+	
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = X_min + (double)(i * dlh);
+				y_temp = Y_min + (double)(j * dlh);
+				z_temp = Z_min + (double)(k * dlh);
+				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					if (x_temp <= 0.0)
+					{
+						e_gas[p] = e_left;
+						p_gas[p] = p_left;
+						rho_gas[p] = rho_left;
+						mas_gas[p] = rho_left / (Particle_on_length * Particle_on_length * Particle_on_length);
+					}
+					else
+					{
+						e_gas[p] = e_right;
+						p_gas[p] = p_right;
+						rho_gas[p] = rho_right;
+						mas_gas[p] = rho_right / (Particle_on_length * Particle_on_length * Particle_on_length);
+					}
+					if ((abs(x_temp) <= 0.8) && (abs(y_temp) <= 0.8) && (abs(z_temp) <= 0.8))
+					{
+						Ind_gas[p] = 0;
+					}
+					else
+					{
+						Ind_gas[p] = 1;
+					}
+					
+
+				};
+			}
+
+	Pr = p;
+
+	Pm = p;
+}
+
 
 int main()
 {
-	double dlh;
+
 
 	FILE *ini_file;
 	char s[128];
@@ -340,44 +478,8 @@ int main()
 
 	// Particle placing
 
-	p = -1;
-	Im = int ((X_max - X_min) * Particle_on_length);
-	Jm = int ((Y_max - Y_min) * Particle_on_length);
-	Km = int ((Z_max - Z_min) * Particle_on_length); 
-
-	// Среда
-
-	double x_temp, y_temp, z_temp;
-
-	for (i = 0; i <= Im; i++)
-		for (j = 0; j <= Jm; j++)
-			for (k = 0; k <= Km; k++)
-			{
-				x_temp = X_min + (double) (i * dlh);
-				y_temp = Y_min + (double) (j * dlh);
-				z_temp = Z_min + (double) (k * dlh);
-				if (x_temp * x_temp + y_temp * y_temp + z_temp * z_temp <= 1.0) {
-				p = p + 1;
-				x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
-				y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
-				z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
-				mas_gas[p] = 1.0 / (Particle_on_length* Particle_on_length*Particle_on_length);
-				Vx_gas[p] = 0.0;
-				Vy_gas[p] = 0.0;
-				Vz_gas[p] = 0.0;
-				Ax_gas[p] = 0.0;
-				Ay_gas[p] = 0.0;
-				Az_gas[p] = 0.0;
-				e_gas[p] = 2.5;
-				p_gas[p] = 1.0;
-				rho_gas[p] = 1.0;
-				Ind_gas[p] = 0;
-				};
-			}
-
-	Pr = p;
-
-	Pm = p;
+	// init_Ball; 
+	init_Sod_X ();
 
 	cudaSetDevice(0);
 

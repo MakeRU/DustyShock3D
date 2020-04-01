@@ -8,7 +8,7 @@ const double Gam_g = 1.4;
 
 // Particle 
 int Maximum_particle, Pr, Pm;
-double h;
+double h, dlh;
 
 // Time variables
 double tau, Tm, T_end, T_out;

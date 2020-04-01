@@ -1,13 +1,13 @@
 // Initial parameters
--1.0		// X_min
-1.0			// X_max
--1.0		// Y_min
-1.0			// Y_max
--1.0		// Z_min
-1.0			// Z_max
+-2.0		// X_min
+2.0			// X_max
+-2.0		// Y_min
+2.0			// Y_max
+-2.0		// Z_min
+2.0			// Z_max
 10000000	// Maximum of particle
-20			// Particle on 1 length
-0.05			//	h
+30			// Particle on 1 length
+0.1			//	h
 0.5			// h_cell / h0
 5.0e-3		// tau
 0.2			// Time end
