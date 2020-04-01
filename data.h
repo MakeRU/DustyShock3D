@@ -60,7 +60,7 @@ int* dev_Cell; // Номер ячейки
 
 // GPU variables
 
-
+double *dev_Gam_g;
 
 // Other variables
 

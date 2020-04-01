@@ -130,17 +130,18 @@ __global__ void ForceInitKernel(double* Ax, double* Ay, double* Az, int* Ind, in
 }
 
 
-__global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, double* p_gas, double* mas, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, int* Cell, int* Nn, int Pm, double Clx, double Cly, double Clz, double Clh, int Cnx, int Cny, int Cl, double h, double Gam_g, double alpha, double beta, double eps, int k, int l, int g)
+__global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, double* p_gas, double* mas_gas, double* e, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, int* Cell, int* Nn, int Pm, double Clx, double Cly, double Clz, double Clh, int Cnx, int Cny, int Cl, double h, double tau, double Gam_g, double alpha, double beta, double eps, int k, int l, int g)
 {
 
 	int j, Ni, Ci;
-	double d, F_nu, nu1x, nu1y, nu1z, dist, A, F_tens, Cnu;
+	double d, F_nu, nu1x, nu1y, nu1z, dist, A, F_tens, Cnu, e_temp;
 
 	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
 	if (i > Pm) return;
 
 	if (Ind[i] == 0)
 	{
+		e_temp = 0.0;
 		Ni = int((x[i] - Clx) / Clh) + (int((y[i] - Cly) / Clh)) * Cnx + (int((z[i] - Clz) / Clh)) * Cnx * Cny;
 		Ci = Ni + k + l * Cnx + g * Cnx * Cny;
 		if ((Ci > -1) && (Ci < Cl))
@@ -167,7 +168,9 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 					}
 
 				//	F_tens = kapp * mas[j] * dist * W(dist, h0);
-					A = mas[j] * (p_gas[i] / (rho_gas[i] * rho_gas[i]) + p_gas[j] / (rho_gas[j] * rho_gas[j]) + F_nu) * dW(dist, h);
+					e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) * 
+						((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
+					A = mas_gas[j] * (p_gas[i] / (rho_gas[i] * rho_gas[i]) + p_gas[j] / (rho_gas[j] * rho_gas[j]) + F_nu) * dW(dist, h);
 					d = (x[j] - x[i]);
 					Ax[i] = Ax[i] + d * A / dist;
 					d = (y[j] - y[i]);
@@ -181,7 +184,7 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 				j = Nn[j];
 			}
 		}
-
+		e[i] = e[i] + e_temp * tau;
 
 	}
 }
@@ -230,7 +233,7 @@ void Data_out(int num)
 	out_file_gas = fopen(out_name, "wt");
 	fprintf(out_file_gas, "t=%5.3f \n", Tm);
 	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t Ax \t Ay \t Az \t e \t Ind \n");
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
 
 	for (i = 0; i <= Pm; i++)
 	{
@@ -257,7 +260,8 @@ int main()
 
 	FILE *ini_file;
 	char s[128];
-	fopen_s(&ini_file, "Init.txt", "r");
+//	fopen_s(&ini_file, "Init.txt", "r");
+	ini_file = fopen("Init.txt", "r");
 	fgets(s, 128, ini_file);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &X_min);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &X_max);
@@ -396,7 +400,8 @@ int main()
 	
 	// cudaMemcpyToSymbol(&Gam_g, &Gam_g, sizeof(double), cudaMemcpyHostToDevice);
 
-
+	cudaMalloc((void**)&dev_Gam_g, sizeof(double));
+	cudaMemcpy(dev_Gam_g, &Gam_g, sizeof(double), cudaMemcpyHostToDevice);
 
 	dim3 gridSize = dim3(Pm / 256 + 1, 1, 1);
 	dim3 blockSize = dim3(16, 16, 1);
@@ -477,7 +482,7 @@ int main()
 			for (l = -1; l <= 1; l++)
 				for (g = -1; g <= 1; g++)
 				{
-					ForceKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, Gam_g, alpha, beta, eps, k, l, g);
+					ForceKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_e_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, tau, Gam_g, alpha, beta, eps, k, l, g);
 					cudaDeviceSynchronize();
 				}
 
