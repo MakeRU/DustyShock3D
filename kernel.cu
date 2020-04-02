@@ -134,7 +134,7 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 {
 
 	int j, Ni, Ci;
-	double d, F_nu, nu1x, nu1y, nu1z, dist, A, F_tens, Cnu, e_temp;
+	double d, F_nu, nu1x, nu1y, nu1z, nu_temp, dist, A, F_tens, Cnu, e_temp;
 
 	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
 	if (i > Pm) return;
@@ -160,15 +160,18 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 					nu1x = (Vx[i] - Vx[j]) * (x[i] - x[j]);
 					nu1y = (Vy[i] - Vy[j]) * (y[i] - y[j]);
 					nu1z = (Vz[i] - Vz[j]) * (z[i] - z[j]);
-					if ((nu1x < 0) && (nu1y < 0) && (nu1z < 0))
+					nu_temp = nu1x + nu1y + nu1z;
+					if (nu_temp < 0.0)
 					{
 						Cnu = 0.5 * (sqrt(Gam_g * p_gas[i] / rho_gas[i]) + sqrt(Gam_g * p_gas[j] / rho_gas[j]));
-						nu1x = h * nu1x / (dist *dist + eps * h * h);
+						nu_temp = h * nu_temp / (dist *dist + eps * h * h);
 						F_nu = (-alpha * Cnu * nu1x + beta * nu1x * nu1x) / (0.5 * (rho_gas[i] + rho_gas[j])); 
 					}
 
 				//	F_tens = kapp * mas[j] * dist * W(dist, h0);
-					e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) * 
+					//e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) * 
+					//	((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
+					e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[i] / 2.0 * F_nu) *
 						((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
 					A = mas_gas[j] * (p_gas[i] / (rho_gas[i] * rho_gas[i]) + p_gas[j] / (rho_gas[j] * rho_gas[j]) + F_nu) * dW(dist, h);
 					d = (x[j] - x[i]);
@@ -336,8 +339,8 @@ void init_Sod_X()
 	p_right = 0.1;
 	e_left = 2.5;
 	e_right = 2.0;
-	rho_left = Eq_State1(p_left, e_left, 0, 1.4, 1.0);
-	rho_right = Eq_State1(p_right, e_right, 0, 1.4, 1.0);
+	rho_left = Eq_State1(p_left, e_left, Type_of_state, 1.4, 1.0);
+	rho_right = Eq_State1(p_right, e_right, Type_of_state, 1.4, 1.0);
 	
 
 	for (i = 0; i <= Im; i++)
@@ -391,6 +394,110 @@ void init_Sod_X()
 	Pm = p;
 }
 
+void init_Sod_X_mas()
+{
+	double x_temp, y_temp, z_temp;
+	double p_left, p_right, e_left, e_right, rho_left, rho_right, dlh_left, dlh_right, mas_particle;
+
+
+	p_left = 1.0;
+	p_right = 0.1;
+	e_left = 2.5;
+	e_right = 2.0;
+	rho_left = Eq_State1(p_left, e_left, Type_of_state, 1.4, 1.0);
+	rho_right = Eq_State1(p_right, e_right, Type_of_state, 1.4, 1.0);
+
+	mas_particle = 1.0 / (Particle_on_length * Particle_on_length * Particle_on_length);
+	dlh_left = pow(mas_particle/rho_left,1/3.0);
+	dlh_right = pow(mas_particle / rho_right, 1 / 3.0);
+
+	p = -1;
+
+	Im = int((0.0 - X_min) / dlh_left);
+	Jm = int((Y_max - Y_min) / dlh_left);
+	Km = int((Z_max - Z_min) / dlh_left);
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = X_min + (double)(i * dlh_left);
+				y_temp = Y_min + (double)(j * dlh_left);
+				z_temp = Z_min + (double)(k * dlh_left);
+				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					e_gas[p] = e_left;
+					p_gas[p] = p_left;
+					rho_gas[p] = rho_left;
+					mas_gas[p] = mas_particle;
+					}
+				if ((abs(x_temp) <= 0.8) && (abs(y_temp) <= 0.8) && (abs(z_temp) <= 0.8))
+					{
+						Ind_gas[p] = 0;
+					}
+				else
+					{
+						Ind_gas[p] = 1;
+					}
+
+
+				};
+
+	Im = int((X_max - 0.0) / dlh_right);
+	Jm = int((Y_max - Y_min) / dlh_right);
+	Km = int((Z_max - Z_min) / dlh_right);
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = 0.0 + (double)(i * dlh_right);
+				y_temp = Y_min + (double)(j * dlh_right);
+				z_temp = Z_min + (double)(k * dlh_right);
+				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					e_gas[p] = e_right;
+					p_gas[p] = p_right;
+					rho_gas[p] = rho_right;
+					mas_gas[p] = mas_particle;
+				}
+				if ((abs(x_temp) <= 0.8) && (abs(y_temp) <= 0.8) && (abs(z_temp) <= 0.8))
+				{
+					Ind_gas[p] = 0;
+				}
+				else
+				{
+					Ind_gas[p] = 1;
+				}
+
+			};
+
+	
+	Pr = p;
+
+	Pm = p;
+}
+
 
 int main()
 {
@@ -437,6 +544,7 @@ int main()
 	fclose(ini_file);
 
 	Type_of_state = 0;
+	Speed_of_sound_gas = 1.0;
 	dlh = (double) 1.0 / Particle_on_length;
 	Tm = 0.0;
 	out_num = 0;
@@ -478,8 +586,9 @@ int main()
 
 	// Particle placing
 
-	// init_Ball; 
-	init_Sod_X ();
+	// init_Ball(); 
+	//  init_Sod_X();
+	init_Sod_X_mas();
 
 	cudaSetDevice(0);
 
