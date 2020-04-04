@@ -171,7 +171,7 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 				//	F_tens = kapp * mas[j] * dist * W(dist, h0);
 					//e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) * 
 					//	((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
-					e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[i] / 2.0 * F_nu) *
+					e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) *
 						((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
 					A = mas_gas[j] * (p_gas[i] / (rho_gas[i] * rho_gas[i]) + p_gas[j] / (rho_gas[j] * rho_gas[j]) + F_nu) * dW(dist, h);
 					d = (x[j] - x[i]);
@@ -252,13 +252,13 @@ void Data_out(int num)
 
 	fclose(out_file_gas);
 
-	if (num < 10000000) { sprintf(out_name, "Data/L%d.dat", num); };
-	if (num < 1000000) { sprintf(out_name, "Data/L0%d.dat", num); };
-	if (num < 100000) { sprintf(out_name, "Data/L00%d.dat", num); };
-	if (num < 10000) { sprintf(out_name, "Data/L000%d.dat", num); };
-	if (num < 1000) { sprintf(out_name, "Data/L0000%d.dat", num); };
-	if (num < 100) { sprintf(out_name, "Data/L00000%d.dat", num); };
-	if (num < 10) { sprintf(out_name, "Data/L000000%d.dat", num); };
+	if (num < 10000000) { sprintf(out_name, "Data/L_X%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L_X0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L_X00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L_X000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L_X0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L_X00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L_X000000%d.dat", num); };
 
 	out_file_gas = fopen(out_name, "wt");
 	fprintf(out_file_gas, "t=%5.3f \n", Tm);
@@ -279,8 +279,140 @@ void Data_out(int num)
 
 	fclose(out_file_gas);
 
+	if (num < 10000000) { sprintf(out_name, "Data/L_Y%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L_Y0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L_Y00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L_Y000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L_Y0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L_Y00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L_Y000000%d.dat", num); };
 
+	out_file_gas = fopen(out_name, "wt");
+	fprintf(out_file_gas, "t=%5.3f \n", Tm);
+	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
 
+	for (i = 0; i <= Pm; i++)
+	{
+		if ((x_gas[i] * x_gas[i] + z_gas[i] * z_gas[i] <= h * h))
+		{
+			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
+			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+		}
+
+	}
+
+	fclose(out_file_gas);
+
+	if (num < 10000000) { sprintf(out_name, "Data/L_Z%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L_Z0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L_Z00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L_Z000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L_Z0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L_Z00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L_Z000000%d.dat", num); };
+
+	out_file_gas = fopen(out_name, "wt");
+	fprintf(out_file_gas, "t=%5.3f \n", Tm);
+	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+	for (i = 0; i <= Pm; i++)
+	{
+		if ((x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] <= h * h))
+		{
+			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
+			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+		}
+
+	}
+
+	fclose(out_file_gas);
+
+	if (num < 10000000) { sprintf(out_name, "Data/L_XY%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L_XY0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L_XY00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L_XY000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L_XY0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L_XY00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L_XY000000%d.dat", num); };
+
+	out_file_gas = fopen(out_name, "wt");
+	fprintf(out_file_gas, "t=%5.3f \n", Tm);
+	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+	for (i = 0; i <= Pm; i++)
+	{
+		if (abs(z_gas[i]) <= h)
+		{
+			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
+			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+		}
+
+	}
+
+	fclose(out_file_gas);
+
+	if (num < 10000000) { sprintf(out_name, "Data/L_XZ%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L_XZ0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L_XZ00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L_XZ000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L_XZ0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L_XZ00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L_XZ000000%d.dat", num); };
+
+	out_file_gas = fopen(out_name, "wt");
+	fprintf(out_file_gas, "t=%5.3f \n", Tm);
+	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+	for (i = 0; i <= Pm; i++)
+	{
+		if (abs(y_gas[i]) <= h)
+		{
+		r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
+		v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+		fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+			x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+		}
+
+	}
+
+	fclose(out_file_gas);
+
+	if (num < 10000000) { sprintf(out_name, "Data/L_YZ%d.dat", num); };
+	if (num < 1000000) { sprintf(out_name, "Data/L_YZ0%d.dat", num); };
+	if (num < 100000) { sprintf(out_name, "Data/L_YZ00%d.dat", num); };
+	if (num < 10000) { sprintf(out_name, "Data/L_YZ000%d.dat", num); };
+	if (num < 1000) { sprintf(out_name, "Data/L_YZ0000%d.dat", num); };
+	if (num < 100) { sprintf(out_name, "Data/L_YZ00000%d.dat", num); };
+	if (num < 10) { sprintf(out_name, "Data/L_YZ000000%d.dat", num); };
+
+	out_file_gas = fopen(out_name, "wt");
+	fprintf(out_file_gas, "t=%5.3f \n", Tm);
+	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+	for (i = 0; i <= Pm; i++)
+	{
+		if (abs(x_gas[i]) <= h)
+		{
+		r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
+		v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
+		fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+			x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+		}
+
+	}
+
+	fclose(out_file_gas);
 }
 
 
