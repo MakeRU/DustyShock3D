@@ -115,7 +115,7 @@ __global__ void PKernel(double* rho, double* p, double* e, int* Ind, int Pm, int
 }
 
 
-__global__ void ForceInitKernel(double* Ax, double* Ay, double* Az, int* Ind, int Pm)
+__global__ void ForceInitKernel(double* Ax, double* Ay, double* Az, int* Ind, double* e_temp, int Pm)
 {
 
 	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
@@ -126,22 +126,23 @@ __global__ void ForceInitKernel(double* Ax, double* Ay, double* Az, int* Ind, in
 		Ax[i] = 0.0;
 		Ay[i] = 0.0;
 		Az[i] = 0.0;
+		e_temp[i] = 0.0;
 	}
 }
 
 
-__global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, double* p_gas, double* mas_gas, double* e, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, int* Cell, int* Nn, int Pm, double Clx, double Cly, double Clz, double Clh, int Cnx, int Cny, int Cl, double h, double tau, double Gam_g, double alpha, double beta, double eps, int k, int l, int g)
+__global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, double* p_gas, double* mas_gas, double* e, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, double* e_temp, int* Ind, int* Cell, int* Nn, int Pm, double Clx, double Cly, double Clz, double Clh, int Cnx, int Cny, int Cl, double h, double tau, double Gam_g, double alpha, double beta, double eps, int k, int l, int g)
 {
 
 	int j, Ni, Ci;
-	double d, F_nu, nu1x, nu1y, nu1z, nu_temp, dist, A, F_tens, Cnu, e_temp;
+	double d, F_nu, nu1x, nu1y, nu1z, nu_temp, dist, A, F_tens, Cnu;
 
 	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
 	if (i > Pm) return;
 
 	if (Ind[i] == 0)
 	{
-		e_temp = 0.0;
+
 		Ni = int((x[i] - Clx) / Clh) + (int((y[i] - Cly) / Clh)) * Cnx + (int((z[i] - Clz) / Clh)) * Cnx * Cny;
 		Ci = Ni + k + l * Cnx + g * Cnx * Cny;
 		if ((Ci > -1) && (Ci < Cl))
@@ -165,13 +166,15 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 					{
 						Cnu = 0.5 * (sqrt(Gam_g * p_gas[i] / rho_gas[i]) + sqrt(Gam_g * p_gas[j] / rho_gas[j]));
 						nu_temp = h * nu_temp / (dist *dist + eps * h * h);
-						F_nu = (-alpha * Cnu * nu1x + beta * nu1x * nu1x) / (0.5 * (rho_gas[i] + rho_gas[j])); 
+						F_nu = (-alpha * Cnu * nu_temp + beta * nu_temp * nu_temp) / (0.5 * (rho_gas[i] + rho_gas[j]));
 					}
 
 				//	F_tens = kapp * mas[j] * dist * W(dist, h0);
 					//e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) * 
 					//	((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
-					e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) *
+					// e_temp = e_temp + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[j] * p_gas[j] / (rho_gas[j] * rho_gas[j]) + mas_gas[j] / 2.0 * F_nu) *
+					//	((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
+					e_temp[i] = e_temp[i] + (mas_gas[i] * p_gas[i] / (rho_gas[i] * rho_gas[i]) + mas_gas[i] * F_nu / 2.0) *
 						((Vx[i] - Vx[j]) * dW(x[i] - x[j], h) + (Vy[i] - Vy[j]) * dW(y[i] - y[j], h) + (Vz[i] - Vz[j]) * dW(z[i] - z[j], h));
 					A = mas_gas[j] * (p_gas[i] / (rho_gas[i] * rho_gas[i]) + p_gas[j] / (rho_gas[j] * rho_gas[j]) + F_nu) * dW(dist, h);
 					d = (x[j] - x[i]);
@@ -187,12 +190,11 @@ __global__ void ForceKernel(double* x, double* y, double* z, double* rho_gas, do
 				j = Nn[j];
 			}
 		}
-		e[i] = e[i] + e_temp * tau;
 
 	}
 }
 
-__global__ void MoveKernel(double* x, double* y, double* z, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, double tau, int Pm)
+__global__ void MoveKernel(double* x, double* y, double* z, double* Vx, double* Vy, double* Vz, double* Ax, double* Ay, double* Az, int* Ind, double* e_temp, double* e_gas, double tau, int Pm)
 {
 
 	int i = blockIdx.x * 256 + threadIdx.x + threadIdx.y * 16;
@@ -204,6 +206,8 @@ __global__ void MoveKernel(double* x, double* y, double* z, double* Vx, double* 
 		Vx[i] = Vx[i] + Ax[i] * tau;
 		Vy[i] = Vy[i] + Ay[i] * tau;
 		Vz[i] = Vz[i] + Az[i] * tau;
+		e_gas[i] = e_gas[i] + e_temp[i] * tau;
+ 
 
 
 		x[i] = x[i] + Vx[i] * tau;
@@ -222,8 +226,10 @@ void Data_out(int num)
 	FILE* out_file_gas, * out_file_dust, * out_file;
 	char out_name[25];
 	int i, j, l;
-	double r,v;
+	double r,v, eps_out;
 
+
+	eps_out = 1.0*h;
 
 	if (num < 10000000) { sprintf(out_name, "Data/G%d.dat", num); };
 	if (num < 1000000) { sprintf(out_name, "Data/G0%d.dat", num); };
@@ -267,7 +273,7 @@ void Data_out(int num)
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if ((y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i] <= h*h))
+		if ((y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i] <= eps_out * eps_out))
 		{
 			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
 			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
@@ -294,7 +300,7 @@ void Data_out(int num)
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if ((x_gas[i] * x_gas[i] + z_gas[i] * z_gas[i] <= h * h))
+		if ((x_gas[i] * x_gas[i] + z_gas[i] * z_gas[i] <= eps_out * eps_out))
 		{
 			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
 			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
@@ -321,7 +327,7 @@ void Data_out(int num)
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if ((x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] <= h * h))
+		if ((x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] <= eps_out * eps_out))
 		{
 			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
 			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
@@ -348,7 +354,7 @@ void Data_out(int num)
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if (abs(z_gas[i]) <= h)
+		if (abs(z_gas[i]) <= eps_out)
 		{
 			r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
 			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
@@ -375,7 +381,7 @@ void Data_out(int num)
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if (abs(y_gas[i]) <= h)
+		if (abs(y_gas[i]) <= eps_out)
 		{
 		r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
 		v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
@@ -402,7 +408,7 @@ void Data_out(int num)
 
 	for (i = 0; i <= Pm; i++)
 	{
-		if (abs(x_gas[i]) <= h)
+		if (abs(x_gas[i]) <= eps_out)
 		{
 		r = sqrt(x_gas[i] * x_gas[i] + y_gas[i] * y_gas[i] + z_gas[i] * z_gas[i]);
 		v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
@@ -530,6 +536,8 @@ void init_Sod_X_mas()
 {
 	double x_temp, y_temp, z_temp;
 	double p_left, p_right, e_left, e_right, rho_left, rho_right, dlh_left, dlh_right, mas_particle;
+	
+	double border_length = 2.5 * h;
 
 
 	p_left = 1.0;
@@ -545,18 +553,18 @@ void init_Sod_X_mas()
 
 	p = -1;
 
-	Im = int((0.0 - X_min) / dlh_left);
-	Jm = int((Y_max - Y_min) / dlh_left);
-	Km = int((Z_max - Z_min) / dlh_left);
+	Im = int((0.0 - X_min) / dlh_left) +1;
+	Jm = int((Y_max - Y_min) / dlh_left) +1;
+	Km = int((Z_max - Z_min) / dlh_left) +1;
 
 	for (i = 0; i <= Im; i++)
 		for (j = 0; j <= Jm; j++)
 			for (k = 0; k <= Km; k++)
 			{
-				x_temp = X_min + (double)(i * dlh_left);
+				x_temp = 0.0 - (double)(i * dlh_left);
 				y_temp = Y_min + (double)(j * dlh_left);
 				z_temp = Z_min + (double)(k * dlh_left);
-				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
+				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <=1.0))
 				{
 					p = p + 1;
 					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
@@ -573,7 +581,7 @@ void init_Sod_X_mas()
 					rho_gas[p] = rho_left;
 					mas_gas[p] = mas_particle;
 					}
-				if ((abs(x_temp) <= 0.8) && (abs(y_temp) <= 0.8) && (abs(z_temp) <= 0.8))
+				if ((abs(x_temp) <= 1.0 - border_length) && (abs(y_temp) <= 1.0 - border_length) && (abs(z_temp) <= 1.0 - border_length))
 					{
 						Ind_gas[p] = 0;
 					}
@@ -585,15 +593,15 @@ void init_Sod_X_mas()
 
 				};
 
-	Im = int((X_max - 0.0) / dlh_right);
-	Jm = int((Y_max - Y_min) / dlh_right);
-	Km = int((Z_max - Z_min) / dlh_right);
+	Im = int((X_max - 0.0) / dlh_right) +1;
+	Jm = int((Y_max - Y_min) / dlh_right) +1;
+	Km = int((Z_max - Z_min) / dlh_right) +1;
 
 	for (i = 0; i <= Im; i++)
 		for (j = 0; j <= Jm; j++)
 			for (k = 0; k <= Km; k++)
 			{
-				x_temp = 0.0 + (double)(i * dlh_right);
+				x_temp = dlh_right + (double)(i * dlh_right);
 				y_temp = Y_min + (double)(j * dlh_right);
 				z_temp = Z_min + (double)(k * dlh_right);
 				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
@@ -613,7 +621,7 @@ void init_Sod_X_mas()
 					rho_gas[p] = rho_right;
 					mas_gas[p] = mas_particle;
 				}
-				if ((abs(x_temp) <= 0.8) && (abs(y_temp) <= 0.8) && (abs(z_temp) <= 0.8))
+				if ((abs(x_temp) <= 1.0 - border_length) && (abs(y_temp) <= 1.0 - border_length) && (abs(z_temp) <= 1.0 - border_length))
 				{
 					Ind_gas[p] = 0;
 				}
@@ -625,6 +633,113 @@ void init_Sod_X_mas()
 			};
 
 	
+	Pr = p;
+
+	Pm = p;
+}
+
+void init_Sod_X_e()
+{
+	double x_temp, y_temp, z_temp;
+	double p_left, p_right, e_left, e_right, rho_left, rho_right, dlh_left, dlh_right, mas_particle;
+
+	double border_length = 2.5 * h;
+
+
+	e_left = 2.5;
+	e_right = 2.0;
+	rho_left = 1.0;  
+	rho_right = 1.0;  
+	p_left = Eq_State(rho_left, e_left, Type_of_state, 1.4, 1.0);
+	p_right = Eq_State(rho_right, e_right, Type_of_state, 1.4, 1.0);
+
+
+	mas_particle = 1.0 / (Particle_on_length * Particle_on_length * Particle_on_length);
+	dlh_left = pow(mas_particle / rho_left, 1 / 3.0);
+	dlh_right = pow(mas_particle / rho_right, 1 / 3.0);
+
+	p = -1;
+
+	Im = int((0.0 - X_min) / dlh_left) + 1;
+	Jm = int((Y_max - Y_min) / dlh_left) + 1;
+	Km = int((Z_max - Z_min) / dlh_left) + 1;
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = 0.0 - (double)(i * dlh_left);
+				y_temp = Y_min + (double)(j * dlh_left);
+				z_temp = Z_min + (double)(k * dlh_left);
+				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					e_gas[p] = e_left;
+					p_gas[p] = p_left;
+					rho_gas[p] = rho_left;
+					mas_gas[p] = mas_particle;
+				}
+				if ((abs(x_temp) <= 1.0 - border_length) && (abs(y_temp) <= 1.0 - border_length) && (abs(z_temp) <= 1.0 - border_length))
+				{
+					Ind_gas[p] = 0;
+				}
+				else
+				{
+					Ind_gas[p] = 1;
+				}
+
+
+			};
+
+	Im = int((X_max - 0.0) / dlh_right) + 1;
+	Jm = int((Y_max - Y_min) / dlh_right) + 1;
+	Km = int((Z_max - Z_min) / dlh_right) + 1;
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = dlh_right + (double)(i * dlh_right);
+				y_temp = Y_min + (double)(j * dlh_right);
+				z_temp = Z_min + (double)(k * dlh_right);
+				if ((abs(x_temp) <= 1.0) && (abs(y_temp) <= 1.0) && (abs(z_temp) <= 1.0))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					e_gas[p] = e_right;
+					p_gas[p] = p_right;
+					rho_gas[p] = rho_right;
+					mas_gas[p] = mas_particle;
+				}
+				if ((abs(x_temp) <= 1.0 - border_length) && (abs(y_temp) <= 1.0 - border_length) && (abs(z_temp) <= 1.0 - border_length))
+				{
+					Ind_gas[p] = 0;
+				}
+				else
+				{
+					Ind_gas[p] = 1;
+				}
+
+			};
+
+
 	Pr = p;
 
 	Pm = p;
@@ -655,6 +770,7 @@ int main()
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &T_out);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &alpha);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &beta);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &eps);
 
 
 /*	fgets(s, 128, ini_file);	sscanf(s, "%lf", &Zm);
@@ -720,7 +836,8 @@ int main()
 
 	// init_Ball(); 
 	//  init_Sod_X();
-	init_Sod_X_mas();
+	// init_Sod_X_mas();
+	init_Sod_X_e();
 
 	cudaSetDevice(0);
 
@@ -740,6 +857,7 @@ int main()
 	cudaMalloc((void**)&dev_Ind_gas, (Maximum_particle + 1) * sizeof(int));
 	cudaMalloc((void**)&dev_Cell, (Cl) * sizeof(int));
 	cudaMalloc((void**)&dev_Nn, (Maximum_particle + 1) * sizeof(int));
+	cudaMalloc((void**)&dev_e_temp, (Maximum_particle + 1) * sizeof(double));
 	
 	// cudaMemcpyToSymbol(&Gam_g, &Gam_g, sizeof(double), cudaMemcpyHostToDevice);
 
@@ -818,19 +936,19 @@ int main()
 		cudaDeviceSynchronize();
 
 
-		ForceInitKernel <<<gridSize, blockSize >>> (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, Pm);
+		ForceInitKernel <<<gridSize, blockSize >>> (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_e_temp, Pm);
 		cudaDeviceSynchronize();
 
 		for (k = -1; k <= 1; k++)
 			for (l = -1; l <= 1; l++)
 				for (g = -1; g <= 1; g++)
 				{
-					ForceKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_e_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, tau, Gam_g, alpha, beta, eps, k, l, g);
+					ForceKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_e_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_e_temp, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, tau, Gam_g, alpha, beta, eps, k, l, g);
 					cudaDeviceSynchronize();
 				}
 
 
-		MoveKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, tau, Pm);
+		MoveKernel <<<gridSize, blockSize >>> (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_e_temp, dev_e_gas, tau, Pm);
 		cudaDeviceSynchronize();
 
 

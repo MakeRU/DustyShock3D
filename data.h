@@ -58,6 +58,8 @@ int* dev_Nn; // Номер следующей
 int* dev_Nc; // Номер ячейки в которой частица
 int* dev_Cell; // Номер ячейки
 
+double* dev_e_temp;
+
 // GPU variables
 
 double *dev_Gam_g;
