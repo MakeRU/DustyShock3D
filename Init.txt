@@ -5,6 +5,7 @@
 2.0			// Y_max
 -2.0		// Z_min
 2.0			// Z_max
+0			// Eq of State (0 - with e, 1 -  acoustic)
 10000000	// Maximum of particle
 40			// Particle on 1 length
 0.1			//	h
