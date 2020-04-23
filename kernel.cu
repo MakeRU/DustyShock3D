@@ -427,6 +427,209 @@ void Data_out(int num)
 	fclose(out_file_gas);
 }
 
+void Data_out_dust(int num)
+{
+	FILE * out_file_dust, * out_file;
+	char out_name[25];
+	int i, j, l, dust_id;
+	double r, v, eps_out;
+
+
+	eps_out = 1.0 * h;
+	for (dust_id = 0; dust_id < Num_dust_sort; dust_id++)
+	{
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-000000%d.dat", dust_id, num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			//	if ((x_dust[dust_id][i] >= 0.0) && (x_dust[dust_id][i] <= 1.0))
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_X%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_X0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_X00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_X000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_X0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-L_X00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-L_X000000%d.dat", dust_id, num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_Y%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_Y0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_Y00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_Y000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_Y0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-L_Y00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-L_Y000000%d.dat", dust_id, num); };
+
+		out_file_dust[dust_id] = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((x_dust[dust_id][i] * x_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_Z%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_Z0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_Z00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_Z000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_Z0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-L_Z00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-L_Z000000%d.dat", dust_id, num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_XY%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_XY0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_XY00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_XY000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_XY0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-L_XY00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-L_XY000000%d.dat", dust_id, num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n"); 
+		
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if (abs(z_dust[dust_id][i]) <= eps_out)
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_XZ%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_XZ0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_XZ00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_XZ000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_XZ0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-L_XZ00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-L_XZ000000%d.dat", dust_id, num); };
+
+		out_file_dust[dust_id] = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+		
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if (abs(y_dust[dust_id][i]) <= eps_out)
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_YZ%d.dat", dust_id, num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_YZ0%d.dat", dust_id, num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_YZ00%d.dat", dust_id, num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_YZ000%d.dat", dust_id, num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_YZ0000%d.dat", dust_id, num); };
+		if (num < 100) { sprintf(out_name, "Data/D-%d-L_YZ00000%d.dat", dust_id, num); };
+		if (num < 10) { sprintf(out_name, "Data/D-%d-L_YZ000000%d.dat", dust_id, num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if (abs(x_dust[dust_id][i]) <= eps_out)
+			{
+				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
+				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+	}
+}
 
 
 void init_Ball()
@@ -1207,6 +1410,7 @@ int main()
 		if (Tm >= out_num * T_out)
 		{
 			Data_out(out_num);
+			Data_out_dust(out_num);
 			out_num = out_num + 1;
 		}
 
