@@ -5,7 +5,7 @@ double Particle_on_length;
 
 const double Pi = 3.14159265;
 const double Gam_g = 1.4;
-const int Num_of_dust_sort_max = 10;
+//const int Num_of_dust_sort_max = 10;
 
 // Particle 
 int Maximum_particle, Pr, Pm;
@@ -28,28 +28,43 @@ double alpha, beta, eps;
 
 // Cells to find particle
 int * Ne_gas, * Nc_gas, * Cell_gas, * Nn_gas;
-int* Ne_dust[Num_of_dust_sort_max], * Nc_dust[Num_of_dust_sort_max], * Cell_dust[Num_of_dust_sort_max], * Nn_dust[Num_of_dust_sort_max];
-int Cnx, Cny, Cnz, Cl; // Cells length 
+int* Ne_dust_1, * Nc_dust_1, * Cell_dust_1, * Nn_dust_1;
+int* Ne_dust_2, * Nc_dust_2, * Cell_dust_2, * Nn_dust_2;
+int Cnx, Cny, Cnz, Number_of_fihd_cells; // Cells length 
 double Clx, Cly, Clz, Cmx, Cmy, Cmz, Clh; // 
 
 
 // Dust
 
+/*
 double h_cell;
 int Num_dust_sort, Number_of_dust_cell;
 double * x_dust[Num_of_dust_sort_max], * y_dust[Num_of_dust_sort_max], * z_dust[Num_of_dust_sort_max], * h_dust[Num_of_dust_sort_max], *mas_dust[Num_of_dust_sort_max], *rho_dust[Num_of_dust_sort_max], * Vx_dust[Num_of_dust_sort_max], 
 * Vy_dust[Num_of_dust_sort_max], * Vz_dust[Num_of_dust_sort_max], * Ax_dust[Num_of_dust_sort_max], * Ay_dust[Num_of_dust_sort_max], * Az_dust[Num_of_dust_sort_max],  * t_stop[Num_of_dust_sort_max];
-int * ind_dust[Num_of_dust_sort_max], * N_dust[Num_of_dust_sort_max];
+int * ind_dust[Num_of_dust_sort_max];
 double mas_gas_dust[Num_of_dust_sort_max], R_dust[Num_of_dust_sort_max];
 double Coeff_h_cell, cell_dust_width;
+*/
+
+double* x_dust_1, * y_dust_1, * z_dust_1, * h_dust_1, * mas_dust_1, * rho_dust_1, * Vx_dust_1, * Vy_dust_1, * Vz_dust_1, * Ax_dust_1, * Ay_dust_1, * Az_dust_1, * t_stop_1;
+int* ind_dust_1;
+double mas_gas_dust_1, R_dust_1;
+
+double* x_dust_2, * y_dust_2, * z_dust_2, * h_dust_2, * mas_dust_2, * rho_dust_2, * Vx_dust_2, * Vy_dust_2, * Vz_dust_2, * Ax_dust_2, * Ay_dust_2, * Az_dust_2, * t_stop_2;
+int* ind_dust_2;
+double mas_gas_dust_2, R_dust_2;
 
 // Average variable
 
-double * x_dust_cell, * y_dust_cell, * z_dust_cell;
-double * v_g_average, * rho_g_average, * e_g_average, * Psi_av_new, * v_av_new, * y_av_new, * y_av, * beta_cell;
-int * g_average_count;
-double* v_d_average[Num_of_dust_sort_max], * rho_d_average[Num_of_dust_sort_max], * eps_cell[Num_of_dust_sort_max], * d_average_count[Num_of_dust_sort_max], * t_stop_average[Num_of_dust_sort_max],
-* x_av_new[Num_of_dust_sort_max], * x_av[Num_of_dust_sort_max], * u_av_new[Num_of_dust_sort_max], * b_cell[Num_of_dust_sort_max];
+int Number_of_average_cell;
+double Coeff_h_dust_cell, average_cell_width;
+// double * x_dust_cell, * y_dust_cell, * z_dust_cell;
+double * Vx_g_average, * Vy_g_average, * Vz_g_average, * rho_g_average, * e_g_average, * Psi_av_new, * v_av_new, * y_av_new, * y_av, * beta_cell;
+int * g_average_count, * d_average_count_1, *d_average_count_2;
+double* Vx_d_average_1, * Vy_d_average_1, * Vz_d_average_1, * rho_d_average_1, * eps_cell_1,  * t_stop_average_1,
+* x_av_new_1, * x_av_1, * u_av_new_1, * b_cell_1;
+double* Vx_d_average_2, * Vy_d_average_2, * Vz_d_average_2, * rho_d_average_2, * eps_cell_2, * t_stop_average_2,
+* x_av_new_2, * x_av_2, * u_av_new_2, * b_cell_2;
 
 
 // File
@@ -70,28 +85,46 @@ double* dev_x_gas = 0;
 double* dev_y_gas = 0;
 double* dev_z_gas = 0;
 double* dev_e_gas = 0;
-int* dev_Ind_gas = 0;
+int* dev_ind_gas = 0;
 int* dev_Nn_gas; // Номер следующей
 int* dev_Nc_gas; // Номер ячейки в которой частица
 int* dev_Cell_gas; // Номер ячейки
 
 double* dev_e_temp;
 
-double * dev_x_dust[Num_of_dust_sort_max];
-double* dev_y_dust[Num_of_dust_sort_max];
-double* dev_z_dust[Num_of_dust_sort_max];
-double* dev_Vx_dust[Num_of_dust_sort_max];
-double* dev_Vy_dust[Num_of_dust_sort_max];
-double* dev_Vz_dust[Num_of_dust_sort_max];
-double* dev_Ax_dust[Num_of_dust_sort_max];
-double* dev_Ay_dust[Num_of_dust_sort_max];
-double* dev_Az_dust[Num_of_dust_sort_max];
-double* dev_rho_dust[Num_of_dust_sort_max];
-double* dev_mas_dust[Num_of_dust_sort_max];
-double* dev_Ind_dust[Num_of_dust_sort_max];
-int* dev_Nn_dust[Num_of_dust_sort_max]; // Номер следующей
-int* dev_Nc_dust[Num_of_dust_sort_max]; // Номер ячейки в которой частица
-int* dev_Cell_dust[Num_of_dust_sort_max]; // Номер ячейки
+double * dev_x_dust_1;
+double* dev_y_dust_1;
+double* dev_z_dust_1;
+double* dev_Vx_dust_1;
+double* dev_Vy_dust_1;
+double* dev_Vz_dust_1;
+double* dev_Ax_dust_1;
+double* dev_Ay_dust_1;
+double* dev_Az_dust_1;
+double* dev_rho_dust_1 = 0;
+double* dev_mas_dust_1;
+int* dev_ind_dust_1 = 0;
+double* dev_t_stop_1;
+int* dev_Nn_dust_1; // Номер следующей
+int* dev_Nc_dust_1; // Номер ячейки в которой частица
+int* dev_Cell_dust_1; // Номер ячейки
+
+double* dev_x_dust_2;
+double* dev_y_dust_2;
+double* dev_z_dust_2;
+double* dev_Vx_dust_2;
+double* dev_Vy_dust_2;
+double* dev_Vz_dust_2;
+double* dev_Ax_dust_2;
+double* dev_Ay_dust_2;
+double* dev_Az_dust_2;
+double* dev_rho_dust_2;
+double* dev_mas_dust_2;
+int* dev_ind_dust_2;
+double* dev_t_stop_2;
+int* dev_Nn_dust_2; // Номер следующей
+int* dev_Nc_dust_2; // Номер ячейки в которой частица
+int* dev_Cell_dust_2; // Номер ячейки
 
 // GPU variables
 

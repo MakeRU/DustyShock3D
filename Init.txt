@@ -12,7 +12,7 @@
 0.5			// h_cell / h0
 5.0e-3		// tau
 0.2			// Time end
-0.1			// Time interval to output in files
+5.0e-3		// Time interval to output in files
 1.0			// alfa
 2.0			// beta
 0.01		// eps

@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "data.h"
-#include "IDIC.h"
+
 
 __device__ __host__ double W(double r, double h)
 {
@@ -38,9 +38,11 @@ __device__ __host__ double dW(double r, double h)
 	return  c / (h * h * h * h) * tmp1;
 }
 
-__device__ __host__ double Eq_t_stop(int l, double p, double rho, double gamma)
+#include "IDIC.h"
+
+__device__ __host__ double Eq_t_stop(double R_dust, double p, double rho, double gamma)
 {
-	return R_dust[l] / (sqrt(gamma * p / rho) * rho); 
+	return R_dust / (sqrt(gamma * p / rho) * rho); 
 }
 
 __global__ void RhoInitKernel(double* rho, int* Ind, int Pm)
@@ -256,8 +258,8 @@ void Data_out(int num)
 		{
 			r = sqrt(x_gas[i]* x_gas[i] + y_gas[i]*y_gas[i]+ z_gas[i]*z_gas[i]);
 			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
-			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i], Nn_gas[i]);
 		}
 
 	}
@@ -436,96 +438,41 @@ void Data_out_dust(int num)
 
 
 	eps_out = 1.0 * h;
-	for (dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-	{
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-000000%d.dat", dust_id, num); };
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-000000%d.dat", num); };
 
 		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
 		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t t_stop \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
 
 		for (i = 0; i <= Pm; i++)
 		{
-			//	if ((x_dust[dust_id][i] >= 0.0) && (x_dust[dust_id][i] <= 1.0))
+			//	if ((x_dust_1[i] >= 0.0) && (x_dust_1[i] <= 1.0))
 			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], t_stop_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i], Nn_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
 
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_X%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_X0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_X00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_X000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_X0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-L_X00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-L_X000000%d.dat", dust_id, num); };
-
-		out_file_dust = fopen(out_name, "wt");
-		fprintf(out_file_dust, "t=%5.3f \n", Tm);
-		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
-
-		for (i = 0; i <= Pm; i++)
-		{
-			if ((y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i] <= eps_out * eps_out))
-			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
-			}
-
-		}
-
-		fclose(out_file_dust);
-
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_Y%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_Y0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_Y00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_Y000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_Y0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-L_Y00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-L_Y000000%d.dat", dust_id, num); };
-
-		out_file_dust[dust_id] = fopen(out_name, "wt");
-		fprintf(out_file_dust, "t=%5.3f \n", Tm);
-		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
-
-		for (i = 0; i <= Pm; i++)
-		{
-			if ((x_dust[dust_id][i] * x_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i] <= eps_out * eps_out))
-			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
-			}
-
-		}
-
-		fclose(out_file_dust);
-
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_Z%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_Z0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_Z00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_Z000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_Z0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-L_Z00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-L_Z000000%d.dat", dust_id, num); };
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_X%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_X0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-L_X00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-L_X000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-L_X0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-L_X00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-L_X000000%d.dat", num); };
 
 		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
@@ -534,25 +481,79 @@ void Data_out_dust(int num)
 
 		for (i = 0; i <= Pm; i++)
 		{
-			if ((x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] <= eps_out * eps_out))
+			if ((y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i] <= eps_out * eps_out))
 			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
 				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
 
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_XY%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_XY0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_XY00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_XY000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_XY0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-L_XY00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-L_XY000000%d.dat", dust_id, num); };
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_Y%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_Y0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-L_Y00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-L_Y000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-L_Y0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-L_Y00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-L_Y000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((x_dust_1[i] * x_dust_1[i] + z_dust_1[i] * z_dust_1[i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_Z%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_Z0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-L_Z00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-L_Z000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-L_Z0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-L_Z00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-L_Z000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_XY%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_XY0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-L_XY00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-L_XY000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-L_XY0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-L_XY00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-L_XY000000%d.dat", num); };
 
 		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
@@ -562,27 +563,27 @@ void Data_out_dust(int num)
 
 		for (i = 0; i <= Pm; i++)
 		{
-			if (abs(z_dust[dust_id][i]) <= eps_out)
+			if (abs(z_dust_1[i]) <= eps_out)
 			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
 				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
 
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_XZ%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_XZ0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_XZ00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_XZ000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_XZ0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-L_XZ00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-L_XZ000000%d.dat", dust_id, num); };
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_XZ%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_XZ0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-L_XZ00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-L_XZ000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-L_XZ0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-L_XZ00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-L_XZ000000%d.dat", num); };
 
-		out_file_dust[dust_id] = fopen(out_name, "wt");
+		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
 		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
 		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
@@ -590,25 +591,25 @@ void Data_out_dust(int num)
 
 		for (i = 0; i <= Pm; i++)
 		{
-			if (abs(y_dust[dust_id][i]) <= eps_out)
+			if (abs(y_dust_1[i]) <= eps_out)
 			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
 				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
 
-		if (num < 10000000) { sprintf(out_name, "Data/D-%d-L_YZ%d.dat", dust_id, num); };
-		if (num < 1000000) { sprintf(out_name, "Data/D-%d-L_YZ0%d.dat", dust_id, num); };
-		if (num < 100000) { sprintf(out_name, "Data/D-%d-L_YZ00%d.dat", dust_id, num); };
-		if (num < 10000) { sprintf(out_name, "Data/D-%d-L_YZ000%d.dat", dust_id, num); };
-		if (num < 1000) { sprintf(out_name, "Data/D-%d-L_YZ0000%d.dat", dust_id, num); };
-		if (num < 100) { sprintf(out_name, "Data/D-%d-L_YZ00000%d.dat", dust_id, num); };
-		if (num < 10) { sprintf(out_name, "Data/D-%d-L_YZ000000%d.dat", dust_id, num); };
+		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_YZ%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_YZ0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-1-L_YZ00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-1-L_YZ000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-1-L_YZ0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-1-L_YZ00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-1-L_YZ000000%d.dat", num); };
 
 		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
@@ -617,18 +618,209 @@ void Data_out_dust(int num)
 
 		for (i = 0; i <= Pm; i++)
 		{
-			if (abs(x_dust[dust_id][i]) <= eps_out)
+			if (abs(x_dust_1[i]) <= eps_out)
 			{
-				r = sqrt(x_dust[dust_id][i] * x_dust[dust_id][i] + y_dust[dust_id][i] * y_dust[dust_id][i] + z_dust[dust_id][i] * z_dust[dust_id][i]);
-				v = sqrt(Vx_dust[dust_id][i] * Vx_dust[dust_id][i] + Vy_dust[dust_id][i] * Vy_dust[dust_id][i] + Vz_dust[dust_id][i] * Vz_dust[dust_id][i]);
+				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
+				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
 				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust[dust_id][i], y_dust[dust_id][i], z_dust[dust_id][i], r, mas_dust[dust_id][i], rho_dust[dust_id][i], Vx_dust[dust_id][i], Vy_dust[dust_id][i], Vy_dust[dust_id][i], v, Ax_dust[dust_id][i], Ay_dust[dust_id][i], Az_dust[dust_id][i], ind_dust[dust_id][i]);
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
-	}
+	
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t t_stop \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			//	if ((x_dust_2[i] >= 0.0) && (x_dust_2[i] <= 1.0))
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], t_stop_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i], Nn_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_X%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_X0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-L_X00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-L_X000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-L_X0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-L_X00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-L_X000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_Y%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_Y0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-L_Y00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-L_Y000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-L_Y0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-L_Y00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-L_Y000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((x_dust_2[i] * x_dust_2[i] + z_dust_2[i] * z_dust_2[i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_Z%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_Z0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-L_Z00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-L_Z000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-L_Z0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-L_Z00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-L_Z000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if ((x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] <= eps_out * eps_out))
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_XY%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_XY0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-L_XY00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-L_XY000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-L_XY0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-L_XY00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-L_XY000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if (abs(z_dust_2[i]) <= eps_out)
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_XZ%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_XZ0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-L_XZ00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-L_XZ000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-L_XZ0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-L_XZ00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-L_XZ000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if (abs(y_dust_2[i]) <= eps_out)
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
+		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_YZ%d.dat", num); };
+		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_YZ0%d.dat", num); };
+		if (num < 100000) { sprintf(out_name, "Data/D-2-L_YZ00%d.dat", num); };
+		if (num < 10000) { sprintf(out_name, "Data/D-2-L_YZ000%d.dat", num); };
+		if (num < 1000) { sprintf(out_name, "Data/D-2-L_YZ0000%d.dat", num); };
+		if (num < 100) { sprintf(out_name, "Data/D-2-L_YZ00000%d.dat", num); };
+		if (num < 10) { sprintf(out_name, "Data/D-2-L_YZ000000%d.dat", num); };
+
+		out_file_dust = fopen(out_name, "wt");
+		fprintf(out_file_dust, "t=%5.3f \n", Tm);
+		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t Ind \n");
+
+		for (i = 0; i <= Pm; i++)
+		{
+			if (abs(x_dust_2[i]) <= eps_out)
+			{
+				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
+				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+			}
+
+		}
+
+		fclose(out_file_dust);
+
 }
 
 
@@ -995,61 +1187,91 @@ void init_Dust_Ball()
 
 	Pm = p;
 
-	Num_dust_sort = 2;
-	mas_gas_dust[0] = 0.5;
-	R_dust[0] = 1.0;
-	mas_gas_dust[1] = 0.3333;
-	R_dust[1] = 0.001;
+	//Num_dust_sort = 2;
+	Coeff_h_dust_cell = 0.5;
+	mas_gas_dust_1 = 0.5;
+	R_dust_1 = 1.0;
+	mas_gas_dust_2 = 0.3333;
+	R_dust_2 = 0.001;
 
 
-	for (dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-	{
-		x_dust[dust_id] = new double[Pm + 1];
-		y_dust[dust_id] = new double[Pm + 1];
-		z_dust[dust_id] = new double[Pm + 1];
-		h_dust[dust_id] = new double[Pm + 1];
-		mas_dust[dust_id] = new double[Pm + 1];
-		rho_dust[dust_id] = new double[Pm + 1];
-		Vx_dust[dust_id] = new double[Pm + 1];
-		Vy_dust[dust_id] = new double[Pm + 1];
-		Vz_dust[dust_id] = new double[Pm + 1];
-		Ax_dust[dust_id] = new double[Pm + 1];
-		Ay_dust[dust_id] = new double[Pm + 1];
-		Az_dust[dust_id] = new double[Pm + 1];
-		ind_dust[dust_id] = new int[Pm + 1];
-		t_stop[dust_id] = new double[Pm + 1];
-		N_dust[dust_id] = new int[Pm + 1]; // Number of next particle in cell
-	}
-
+		x_dust_1 = new double[Pm + 1];
+		y_dust_1 = new double[Pm + 1];
+		z_dust_1 = new double[Pm + 1];
+		h_dust_1 = new double[Pm + 1];
+		mas_dust_1 = new double[Pm + 1];
+		rho_dust_1 = new double[Pm + 1];
+		Vx_dust_1 = new double[Pm + 1];
+		Vy_dust_1 = new double[Pm + 1];
+		Vz_dust_1 = new double[Pm + 1];
+		Ax_dust_1 = new double[Pm + 1];
+		Ay_dust_1 = new double[Pm + 1];
+		Az_dust_1 = new double[Pm + 1];
+		ind_dust_1 = new int[Pm + 1];
+		t_stop_1 = new double[Pm + 1];
+		Nn_dust_1 = new int[Pm + 1]; // Number of next particle in cell
+		Cell_dust_1 = new int[Number_of_fihd_cells + 1]; // Number of first particle
+		Ne_dust_1 = new int[Number_of_fihd_cells + 1]; //  Number of last particle
 	
-	for (dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-	{
+		x_dust_2 = new double[Pm + 1];
+		y_dust_2 = new double[Pm + 1];
+		z_dust_2 = new double[Pm + 1];
+		h_dust_2 = new double[Pm + 1];
+		mas_dust_2 = new double[Pm + 1];
+		rho_dust_2 = new double[Pm + 1];
+		Vx_dust_2 = new double[Pm + 1];
+		Vy_dust_2 = new double[Pm + 1];
+		Vz_dust_2 = new double[Pm + 1];
+		Ax_dust_2 = new double[Pm + 1];
+		Ay_dust_2 = new double[Pm + 1];
+		Az_dust_2 = new double[Pm + 1];
+		ind_dust_2 = new int[Pm + 1];
+		t_stop_2 = new double[Pm + 1];
+		Nn_dust_2 = new int[Pm + 1]; // Number of next particle in cell
+		Cell_dust_2 = new int[Number_of_fihd_cells + 1]; // Number of first particle
+		Ne_dust_2 = new int[Number_of_fihd_cells + 1]; //  Number of last particle
+	
+
 		for (p = 0; p <= Pm; p++)
 		{
 			
-			x_dust[dust_id][p] = x_gas[p];
-			y_dust[dust_id][p] = y_gas[p]; 
-			z_dust[dust_id][p] = z_gas[p];
-			h_dust[dust_id][p] = h;
-			mas_dust[dust_id][p] = mas_gas[p]* mas_gas_dust[dust_id]; 
-			rho_dust[dust_id][p] = rho_gas[p] * mas_gas_dust[dust_id]; 
-			Vx_dust[dust_id][p] = 0.0;
-			Vy_dust[dust_id][p] = 0.0;
-			Vz_dust[dust_id][p] = 0.0;
-			Ax_dust[dust_id][p] = 0.0;
-			Ay_dust[dust_id][p] = 0.0;
-			Az_dust[dust_id][p] = 0.0;
-			ind_dust[dust_id][p] = Ind_gas[p];
-			t_stop[dust_id][p] = Eq_t_stop(dust_id, p_gas[p], rho_gas[p], Gam_g);
+			x_dust_1[p] = x_gas[p];
+			y_dust_1[p] = y_gas[p]; 
+			z_dust_1[p] = z_gas[p];
+			h_dust_1[p] = h;
+			mas_dust_1[p] = mas_gas[p]* mas_gas_dust_1; 
+			rho_dust_1[p] = rho_gas[p] * mas_gas_dust_1; 
+			Vx_dust_1[p] = 0.0;
+			Vy_dust_1[p] = 0.0;
+			Vz_dust_1[p] = 0.0;
+			Ax_dust_1[p] = 0.0;
+			Ay_dust_1[p] = 0.0;
+			Az_dust_1[p] = 0.0;
+			ind_dust_1[p] = Ind_gas[p];
+			t_stop_1[p] = Eq_t_stop(R_dust_1, p_gas[p], rho_gas[p], Gam_g);
+
+			x_dust_2[p] = x_gas[p];
+			y_dust_2[p] = y_gas[p];
+			z_dust_2[p] = z_gas[p];
+			h_dust_2[p] = h;
+			mas_dust_2[p] = mas_gas[p] * mas_gas_dust_2;
+			rho_dust_2[p] = rho_gas[p] * mas_gas_dust_2;
+			Vx_dust_2[p] = 0.0;
+			Vy_dust_2[p] = 0.0;
+			Vz_dust_2[p] = 0.0;
+			Ax_dust_2[p] = 0.0;
+			Ay_dust_2[p] = 0.0;
+			Az_dust_2[p] = 0.0;
+			ind_dust_2[p] = Ind_gas[p];
+			t_stop_2[p] = Eq_t_stop(R_dust_2, p_gas[p], rho_gas[p], Gam_g);
 
 		}
-	}
 
-	Clh = Coeff_h_cell * h; // Cell length 
+	/*Clh = Coeff_h_cell * h; // Cell length 
 	Cnx = int((Cmx - Clx) / Clh);
 	Cny = int((Cmy - Cly) / Clh);
 	Cnz = int((Cmz - Clz) / Clh);
-	
+
 	Number_of_dust_cell = (Cnx + 1) * (Cny + 1) * (Cnz + 1); 
 	x_dust_cell = new double[Number_of_dust_cell + 1];
 	y_dust_cell = new double[Number_of_dust_cell + 1];
@@ -1077,7 +1299,7 @@ void init_Dust_Ball()
 		b_cell[dust_id] = new double[Number_of_dust_cell + 1];
 	}
 
-	cell_dust_width = Coeff_h_cell * h; 
+	cell_dust_width = Coeff_h_dust_cell * h; 
 	for (i = 0; i <= Number_of_dust_cell; i++)
 	{
 		//x_dust_cell[i] = (double) X_min + i * cell_dust_width;
@@ -1104,7 +1326,7 @@ void init_Dust_Ball()
 			b_cell[dust_id][i] = 0.0;
 		}
 	}
-
+*/
 }
 
 
@@ -1128,7 +1350,7 @@ int main()
 	fgets(s, 128, ini_file); sscanf(s, "%d", &Maximum_particle);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &Particle_on_length);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &h);
-	fgets(s, 128, ini_file); sscanf(s, "%lf", &h_cell);
+	fgets(s, 128, ini_file); sscanf(s, "%lf", &Coeff_h_dust_cell);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &tau);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &T_end);
 	fgets(s, 128, ini_file); sscanf(s, "%lf", &T_out);
@@ -1176,7 +1398,7 @@ int main()
 	Az_gas = new double[Maximum_particle];
 	e_gas = new double[Maximum_particle];
 	Ind_gas = new int[Maximum_particle];
-	Nn = new int[Maximum_particle]; // Number of next particle in cell
+	Nn_gas = new int[Maximum_particle]; // Number of next particle in cell
 
 	Clx = X_min;
 	Cly = Y_min;
@@ -1189,9 +1411,9 @@ int main()
 	Cny = int((Cmy - Cly) / Clh);
 	Cnz = int((Cmz - Clz) / Clh);
 
-	Cl = (Cnx + 1) * (Cny + 1) * (Cnz + 1);
-	Cell_gas = new int[Cl + 1]; // Number of first particle
-	Ne = new int[Cl + 1]; //  Number of last particle
+	Number_of_fihd_cells = (Cnx + 1) * (Cny + 1) * (Cnz + 1);
+	Cell_gas = new int[Number_of_fihd_cells + 1]; // Number of first particle
+	Ne_gas = new int[Number_of_fihd_cells + 1]; //  Number of last particle
 
 
 
@@ -1219,36 +1441,42 @@ int main()
 	cudaMalloc((void**)&dev_p_gas, (Pm + 1) * sizeof(double));
 	cudaMalloc((void**)&dev_e_gas, (Pm + 1) * sizeof(double));
 	cudaMalloc((void**)&dev_mas_gas, (Pm + 1) * sizeof(double));
-	cudaMalloc((void**)&dev_Ind_gas, (Pm + 1) * sizeof(int));
-	cudaMalloc((void**)&dev_Cell_gas, (Cl) * sizeof(int));
+	cudaMalloc((void**)&dev_ind_gas, (Pm + 1) * sizeof(int));
+	cudaMalloc((void**)&dev_Cell_gas, (Number_of_fihd_cells) * sizeof(int));
 	cudaMalloc((void**)&dev_Nn_gas, (Pm + 1) * sizeof(int));
 	cudaMalloc((void**)&dev_e_temp, (Pm + 1) * sizeof(double));
 	
-	for (int dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-	{
-		cudaMalloc((void**)&dev_x_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_y_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_z_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Vx_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Vy_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Vz_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Ax_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Ay_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Az_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_rho_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_mas_dust[dust_id], (Pm + 1) * sizeof(double));
-		cudaMalloc((void**)&dev_Ind_dust[dust_id], (Pm + 1) * sizeof(int));
-		cudaMalloc((void**)&dev_Cell_dust[dust_id], (Cl) * sizeof(int));
-		cudaMalloc((void**)&dev_Nn_dust[dust_id], (Pm + 1) * sizeof(int));
 
-	}
+		cudaMalloc((void**)&dev_x_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_y_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_z_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vx_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vy_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vz_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Ax_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Ay_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Az_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_rho_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_mas_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_ind_dust_1, (Pm + 1) * sizeof(int));
+		cudaMalloc((void**)&dev_Cell_dust_1, (Number_of_fihd_cells) * sizeof(int));
+		cudaMalloc((void**)&dev_Nn_dust_1, (Pm + 1) * sizeof(int));
 
 
-	// cudaMemcpyToSymbol(&Gam_g, &Gam_g, sizeof(double), cudaMemcpyHostToDevice);
-
-	cudaMalloc((void**)&dev_Gam_g, sizeof(double));
-	cudaMemcpy(dev_Gam_g, &Gam_g, sizeof(double), cudaMemcpyHostToDevice);
-
+		cudaMalloc((void**)&dev_x_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_y_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_z_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vx_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vy_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vz_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Ax_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Ay_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Az_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_rho_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_mas_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_ind_dust_2, (Pm + 1) * sizeof(int));
+		cudaMalloc((void**)&dev_Cell_dust_2, (Number_of_fihd_cells) * sizeof(int));
+		cudaMalloc((void**)&dev_Nn_dust_2, (Pm + 1) * sizeof(int));
 
 
 
@@ -1259,6 +1487,7 @@ int main()
 	out_num = 0;
 
 	Data_out(out_num);
+	Data_out_dust(out_num);
 	out_num = out_num + 1;
 
 
@@ -1270,7 +1499,7 @@ int main()
 
 		// Allocation particled to cells
 
-		for (i = 0; i <= Cl; i++)
+		for (i = 0; i <= Number_of_fihd_cells; i++)
 		{
 			Cell_gas[i] = -1;
 		}
@@ -1283,37 +1512,52 @@ int main()
 		for (p = 0; p <= Pm; p++)
 		{
 			i = int((x_gas[p] - Clx) / Clh) + (int((y_gas[p] - Cly) / Clh)) * Cnx + (int((z_gas[p] - Clz) / Clh)) * Cnx * Cny;
-			if ((i >= 0) && (i <= Cl))
+			if ((i >= 0) && (i <= Number_of_fihd_cells))
 			{
 				if (Cell_gas[i] == -1) { Cell_gas[i] = p; Ne_gas[i] = p; Nn_gas[p] = -1; }
 				else { Nn_gas[Ne_gas[i]] = p; Ne_gas[i] = p; Nn_gas[p] = -1; };
 			}
 		}
-
-		for (int dust_id = 0; dust_id < Num_dust_sort; dust_id++)
+		
+		for (i = 0; i <= Number_of_fihd_cells; i++)
 		{
+			Cell_dust_1[i] = -1;
+		}
 
-			for (i = 0; i <= Cl; i++)
-			{
-				Cell_dust[dust_id][i] = -1;
-			}
+		for (p = 0; p <= Pm; p++)
+		{
+			Nn_dust_1[p] = -1;
+		}
 
-			for (p = 0; p <= Pm; p++)
+		for (p = 0; p <= Pm; p++)
+		{
+			i = int((x_dust_1[p] - Clx) / Clh) + (int((y_dust_1[p] - Cly) / Clh)) * Cnx + (int((z_dust_1[p] - Clz) / Clh)) * Cnx * Cny;
+			if ((i >= 0) && (i <= Number_of_fihd_cells))
 			{
-				Nn_dust[dust_id][p] = -1;
-			}
-
-			for (p = 0; p <= Pm; p++)
-			{
-				i = int((x_dust[dust_id][p] - Clx) / Clh) + (int((y_dust[dust_id][p] - Cly) / Clh)) * Cnx + (int((z_dust[dust_id][p] - Clz) / Clh)) * Cnx * Cny;
-				if ((i >= 0) && (i <= Cl))
-				{
-					if (Cell_dust[dust_id][i] == -1) { Cell_dust[dust_id][i] = p; Ne_dust[dust_id][i] = p; Nn_dust[dust_id][p] = -1; }
-					else { Nn_dust[dust_id][Ne_dust[dust_id][i]] = p; Ne_dust[dust_id][i] = p; Nn_dust[dust_id][p] = -1; };
-				}
+				if (Cell_dust_1[i] == -1) { Cell_dust_1[i] = p; Ne_dust_1[i] = p; Nn_dust_1[p] = -1; }
+				else { Nn_dust_1[Ne_dust_1[i]] = p; Ne_dust_1[i] = p; Nn_dust_1[p] = -1; };
 			}
 		}
 
+		for (i = 0; i <= Number_of_fihd_cells; i++)
+		{
+			Cell_dust_2[i] = -1;
+		}
+
+		for (p = 0; p <= Pm; p++)
+		{
+			Nn_dust_2[p] = -1;
+		}
+
+		for (p = 0; p <= Pm; p++)
+		{
+			i = int((x_dust_2[p] - Clx) / Clh) + (int((y_dust_2[p] - Cly) / Clh)) * Cnx + (int((z_dust_2[p] - Clz) / Clh)) * Cnx * Cny;
+			if ((i >= 0) && (i <= Number_of_fihd_cells))
+			{
+				if (Cell_dust_2[i] == -1) { Cell_dust_2[i] = p; Ne_dust_2[i] = p; Nn_dust_2[p] = -1; }
+				else { Nn_dust_2[Ne_dust_2[i]] = p; Ne_dust_2[i] = p; Nn_dust_2[p] = -1; };
+			}
+		}
 
 		cudaMemcpy(dev_x_gas, x_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_y_gas, y_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
@@ -1328,11 +1572,45 @@ int main()
 		cudaMemcpy(dev_Ax_gas, Ax_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Ay_gas, Ay_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Az_gas, Az_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ind_gas, Ind_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Cell_gas, Cell_gas, (Cl) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_ind_gas, Ind_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Cell_gas, Cell_gas, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Nn_gas, Nn_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
-		Rho_gas_InitKernel_IDIC << <gridSize, blockSize >> > (dev_rho_gas, dev_Ind_gas, Pm);
+
+		cudaMemcpy(dev_x_dust_1, x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_y_dust_1, y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_z_dust_1, z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vx_dust_1, Vx_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vy_dust_1, Vy_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vz_dust_1, Vz_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Ax_dust_1, Ax_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Ay_dust_1, Ay_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Az_dust_1, Az_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_rho_dust_1, rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_t_stop_1, t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_mas_dust_1, mas_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_ind_dust_1, ind_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Cell_dust_1, Cell_dust_1, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Nn_dust_1, Nn_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+
+		cudaMemcpy(dev_x_dust_2, x_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_y_dust_2, y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_z_dust_2, z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vx_dust_2, Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vy_dust_2, Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vz_dust_2, Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Ax_dust_2, Ax_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Ay_dust_2, Ay_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Az_dust_2, Az_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_rho_dust_2, rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_t_stop_2, t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_mas_dust_2, mas_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_ind_dust_2, ind_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Cell_dust_2, Cell_dust_2, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Nn_dust_2, Nn_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+
+
+		Rho_InitKernel_IDIC << <gridSize, blockSize >> > (dev_rho_gas, dev_rho_dust_1, dev_rho_dust_2, dev_ind_gas, Pm);
 		cudaDeviceSynchronize();
 
 		for (k = -1; k <= 1; k++)
@@ -1340,42 +1618,40 @@ int main()
 				for (g = -1; g <= 1; g++)
 				{
 
-					Rho_gas_Kernel_IDIC << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_mas_gas, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, k, l, g);
+					Rho_Kernel_IDIC << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_mas_gas, dev_ind_gas, dev_Cell_gas, dev_Nn_gas, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Number_of_fihd_cells, h, k, l, g);
 					cudaDeviceSynchronize();
 				}
 
-		PKernel << <gridSize, blockSize >> > (dev_rho_gas, dev_p_gas, dev_e_gas, dev_Ind_gas, Pm, Type_of_state, Gam_g, Speed_of_sound_gas);
+		PKernel << <gridSize, blockSize >> > (dev_rho_gas, dev_p_gas, dev_e_gas, dev_ind_gas, Pm, Type_of_state, Gam_g, Speed_of_sound_gas);
 		cudaDeviceSynchronize();
 
 
-		for (int dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-		{
-			Rho_dust_InitKernel_IDIC << <gridSize, blockSize >> > (dev_rho_dust[dust_id], dev_Ind_dust[dust_id], Pm);
-			cudaDeviceSynchronize();
-		}
-
-
-		for (int dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-		{
-			for (k = -1; k <= 1; k++)
-				for (l = -1; l <= 1; l++)
-					for (g = -1; g <= 1; g++)
+	
+		for (k = -1; k <= 1; k++)
+			for (l = -1; l <= 1; l++)
+				for (g = -1; g <= 1; g++)
 					{
-
-						Rho_dust_Kernel_IDIC << <gridSize, blockSize >> > (dev_x_dust[dust_id], dev_y_dust[dust_id], dev_z_dust[dust_id], dev_rho_dust[dust_id], dev_mas_dust[dust_id], dev_Ind_dust[dust_id], dev_Cell_dust[dust_id], dev_Nn_dust[dust_id], Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, k, l, g);
-						cudaDeviceSynchronize();
+					Rho_Kernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_1, dev_y_dust_1, dev_z_dust_1, dev_rho_dust_1, dev_mas_dust_1, dev_ind_dust_1, dev_Cell_dust_1, dev_Nn_dust_1, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Number_of_fihd_cells, h, k, l, g);
+					cudaDeviceSynchronize();
 					}
-		}
+		
+		for (k = -1; k <= 1; k++)
+			for (l = -1; l <= 1; l++)
+				for (g = -1; g <= 1; g++)
+				{
+					Rho_Kernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_2, dev_y_dust_2, dev_z_dust_2, dev_rho_dust_2, dev_mas_dust_2, dev_ind_dust_2, dev_Cell_dust_2, dev_Nn_dust_2, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Number_of_fihd_cells, h, k, l, g);
+					cudaDeviceSynchronize();
+				}
 
-		for (int dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-		{
-			t_stop_Kernel_IDIC << <gridSize, blockSize >> > (dev_t_stop[dust_id], dev_p_gas, dev_rho_gas, dev_Ind_dust[dust_id], Pm, R_dust[dust_id], Gam_g);
-			cudaDeviceSynchronize();
-		}
+		
+		t_stop_Kernel_IDIC << <gridSize, blockSize >> > (dev_t_stop_1, dev_p_gas, dev_rho_gas, dev_ind_dust_1, Pm, R_dust_1, Gam_g);
+		cudaDeviceSynchronize();
+
+		t_stop_Kernel_IDIC << <gridSize, blockSize >> > (dev_t_stop_2, dev_p_gas, dev_rho_gas, dev_ind_dust_2, Pm, R_dust_2, Gam_g);
+		cudaDeviceSynchronize();
 
 
-
-		ForceInitKernel << <gridSize, blockSize >> > (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_e_temp, Pm);
+	/*	ForceInitKernel << <gridSize, blockSize >> > (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_e_temp, Pm);
 		cudaDeviceSynchronize();
 
 		for (k = -1; k <= 1; k++)
@@ -1391,7 +1667,7 @@ int main()
 		cudaDeviceSynchronize();
 
 
-
+	*/
 		cudaMemcpy(x_gas, dev_x_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(y_gas, dev_y_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(z_gas, dev_z_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
@@ -1405,6 +1681,39 @@ int main()
 		cudaMemcpy(Ax_gas, dev_Ax_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Ay_gas, dev_Ay_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Az_gas, dev_Az_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
+		cudaMemcpy(x_dust_1, dev_x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(y_dust_1, dev_y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(z_dust_1, dev_z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vx_dust_1, dev_Vx_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vy_dust_1, dev_Vy_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vz_dust_1, dev_Vz_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Ax_dust_1, dev_Ax_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Ay_dust_1, dev_Ay_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Az_dust_1, dev_Az_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(rho_dust_1, dev_rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(t_stop_1, dev_t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(mas_dust_1, dev_mas_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(ind_dust_1, dev_ind_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Cell_dust_1, dev_Cell_dust_1, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Nn_dust_1, dev_Nn_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
+
+
+		cudaMemcpy(x_dust_2, dev_x_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(y_dust_2, dev_y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(z_dust_2, dev_z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vx_dust_2, dev_Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vy_dust_2, dev_Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vz_dust_2, dev_Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Ax_dust_2, dev_Ax_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Ay_dust_2, dev_Ay_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Az_dust_2, dev_Az_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(rho_dust_2, dev_rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(t_stop_2, dev_t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(mas_dust_2, dev_mas_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(ind_dust_2, dev_ind_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Cell_dust_2, dev_Cell_dust_2, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Nn_dust_2, dev_Nn_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
 
 
 		if (Tm >= out_num * T_out)
