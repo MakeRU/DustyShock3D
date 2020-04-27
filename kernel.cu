@@ -15,8 +15,8 @@ __device__ __host__ double W(double r, double h)
 	double k, c, tmp1;
 	k = (double)fabs(r) / h;
 	c = (double)1 / (Pi);
-	if (k < 1.0) { tmp1 = (double)1.0 - 1.5 * k * k + 0.75 * k * k * k; }
-	if ((k >= 1.0) && (k <= 2.0)) { tmp1 = (double)0.25 * (2 - k) * (2 - k) * (2 - k); }
+	if (k < 1.0) { tmp1 = (double) 1.0 - 1.5 * k * k + 0.75 * k * k * k; }
+	if ((k >= 1.0) && (k <= 2.0)) { tmp1 = (double) 0.25 * (2.0 - k) * (2.0 - k) * (2.0 - k); }
 	if (k > 2.0) { tmp1 = 0.0; }
 
 	return  c / (h * h * h) * tmp1;
@@ -27,12 +27,12 @@ __device__ __host__ double dW(double r, double h)
 	const double Pi = 3.14159265;
 	double k, c, tmp1;
 	k = (double) r / h;
-	c = (double)1 / (Pi);
+	c = (double) 1 / (Pi);
 	if (k < -2.0) { tmp1 = 0.0; }
-	if ((k >= -2.0) && (k <= -1.0)) { tmp1 = (double)0.75 * (2.0 + k) * (2.0 + k); }
-	if ((k > -1.0) && (k < 0)) { tmp1 = (double)-3.0 * k - 2.25 * k * k; }
-	if ((k >= 0) && (k <= 1.0)) { tmp1 = (double)-3.0 * k + 2.25 * k * k; }
-	if ((k >= 1.0) && (k <= 2.0)) { tmp1 = (double)-0.75 * (2.0 - k) * (2.0 - k); }
+	if ((k >= -2.0) && (k <= -1.0)) { tmp1 = (double) 0.75 * (2.0 + k) * (2.0 + k); }
+	if ((k > -1.0) && (k < 0)) { tmp1 = (double) -3.0 * k - 2.25 * k * k; }
+	if ((k >= 0) && (k <= 1.0)) { tmp1 = (double) -3.0 * k + 2.25 * k * k; }
+	if ((k >= 1.0) && (k <= 2.0)) { tmp1 = (double) -0.75 * (2.0 - k) * (2.0 - k); }
 	if (k > 2.0) { tmp1 = 0.0; }
 
 	return  c / (h * h * h * h) * tmp1;
@@ -250,7 +250,7 @@ void Data_out(int num)
 	out_file_gas = fopen(out_name, "wt");
 	fprintf(out_file_gas, "t=%5.3f \n", Tm);
 	fprintf(out_file_gas, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+	fprintf(out_file_gas, "x \t y \t z \t r \t mas \t rho \t p \t Vx \t Vy \t Vz \t V \t e \t Ind \n");
 
 	for (i = 0; i <= Pm; i++)
 	{
@@ -258,14 +258,14 @@ void Data_out(int num)
 		{
 			r = sqrt(x_gas[i]* x_gas[i] + y_gas[i]*y_gas[i]+ z_gas[i]*z_gas[i]);
 			v = sqrt(Vx_gas[i] * Vx_gas[i] + Vy_gas[i] * Vy_gas[i] + Vz_gas[i] * Vz_gas[i]);
-			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
-				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, Ax_gas[i], Ay_gas[i], Az_gas[i], e_gas[i], Ind_gas[i], Nn_gas[i]);
+			fprintf(out_file_gas, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
+				x_gas[i], y_gas[i], z_gas[i], r, mas_gas[i], rho_gas[i], p_gas[i], Vx_gas[i], Vy_gas[i], Vy_gas[i], v, e_gas[i], Ind_gas[i], Nn_gas[i]);
 		}
 
 	}
 
 	fclose(out_file_gas);
-
+/*
 	if (num < 10000000) { sprintf(out_name, "Data/L_X%d.dat", num); };
 	if (num < 1000000) { sprintf(out_name, "Data/L_X0%d.dat", num); };
 	if (num < 100000) { sprintf(out_name, "Data/L_X00%d.dat", num); };
@@ -427,6 +427,7 @@ void Data_out(int num)
 	}
 
 	fclose(out_file_gas);
+	*/
 }
 
 void Data_out_dust(int num)
@@ -450,7 +451,7 @@ void Data_out_dust(int num)
 		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
 		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t t_stop \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t t_stop \t Vx \t Vy \t Vz \t V \t Ind \t \Nn \n");
 
 		for (i = 0; i <= Pm; i++)
 		{
@@ -458,14 +459,14 @@ void Data_out_dust(int num)
 			{
 				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
 				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
-					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], t_stop_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i], Nn_dust_1[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], t_stop_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, ind_dust_1[i], Nn_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
-
+		/*
 		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_X%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_X0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-1-L_X00%d.dat", num); };
@@ -629,7 +630,7 @@ void Data_out_dust(int num)
 		}
 
 		fclose(out_file_dust);
-	
+*/	
 		if (num < 10000000) { sprintf(out_name, "Data/D-2-%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-2-0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-2-00%d.dat", num); };
@@ -641,7 +642,7 @@ void Data_out_dust(int num)
 		out_file_dust = fopen(out_name, "wt");
 		fprintf(out_file_dust, "t=%5.3f \n", Tm);
 		fprintf(out_file_dust, "tau=%10.8lf \t h=%10.8lf \n", tau, h);
-		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t t_stop \t Vx \t Vy \t Vz \t V \t Ax \t Ay \t Az \t e \t Ind \n");
+		fprintf(out_file_dust, "x \t y \t z \t r \t mas \t rho \t t_stop \t Vx \t Vy \t Vz \t V \t Ind \t Nn \n");
 
 		for (i = 0; i <= Pm; i++)
 		{
@@ -649,14 +650,14 @@ void Data_out_dust(int num)
 			{
 				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
 				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
-					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], t_stop_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i], Nn_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], t_stop_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, ind_dust_2[i], Nn_dust_2[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
-
+/*
 		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_X%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_X0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-2-L_X00%d.dat", num); };
@@ -820,7 +821,7 @@ void Data_out_dust(int num)
 		}
 
 		fclose(out_file_dust);
-
+*/
 }
 
 
@@ -1190,7 +1191,7 @@ void init_Dust_Ball()
 	//Num_dust_sort = 2;
 	Coeff_h_dust_cell = 0.5;
 	mas_gas_dust_1 = 0.5;
-	R_dust_1 = 1.0;
+	R_dust_1 = 0.05;
 	mas_gas_dust_2 = 0.3333;
 	R_dust_2 = 0.001;
 
@@ -1267,66 +1268,122 @@ void init_Dust_Ball()
 
 		}
 
-	/*Clh = Coeff_h_cell * h; // Cell length 
-	Cnx = int((Cmx - Clx) / Clh);
-	Cny = int((Cmy - Cly) / Clh);
-	Cnz = int((Cmz - Clz) / Clh);
+	average_cell_width = Coeff_h_dust_cell * h; 
+	Number_of_average_cell_x = int((X_max - X_min) / average_cell_width);
+	Number_of_average_cell_y = int((Y_max - Y_min) / average_cell_width);
+	Number_of_average_cell_z = int((Z_max - Z_min) / average_cell_width);
 
-	Number_of_dust_cell = (Cnx + 1) * (Cny + 1) * (Cnz + 1); 
-	x_dust_cell = new double[Number_of_dust_cell + 1];
-	y_dust_cell = new double[Number_of_dust_cell + 1];
-	z_dust_cell = new double[Number_of_dust_cell + 1];
-	v_g_average = new double[Number_of_dust_cell + 1];
-	rho_g_average = new double[Number_of_dust_cell + 1];
-	e_g_average = new double[Number_of_dust_cell + 1];
-	g_average_count = new int[Number_of_dust_cell + 1];
-	Psi_av_new = new double[Number_of_dust_cell + 1];
-	v_av_new = new double[Number_of_dust_cell + 1];
-	y_av_new = new double[Number_of_dust_cell + 1];
-	y_av = new double[Number_of_dust_cell + 1];
-	beta_cell = new double[Number_of_dust_cell + 1];
+	Number_of_average_cell = (Number_of_average_cell_x + 1) * (Number_of_average_cell_y + 1) * (Number_of_average_cell_z + 1);
+//	x_dust_cell = new double[Number_of_dust_cell + 1];
+//	y_dust_cell = new double[Number_of_dust_cell + 1];
+//	z_dust_cell = new double[Number_of_dust_cell + 1];
+	
+	Vx_g_average = new double[Number_of_average_cell + 1];
+	Vy_g_average = new double[Number_of_average_cell + 1];
+	Vz_g_average = new double[Number_of_average_cell + 1];
+	rho_g_average = new double[Number_of_average_cell + 1];
+	e_g_average = new double[Number_of_average_cell + 1];
+	g_average_count = new int[Number_of_average_cell + 1];
+	Psi_av_new_x = new double[Number_of_average_cell + 1];
+	Psi_av_new_y = new double[Number_of_average_cell + 1];
+	Psi_av_new_z = new double[Number_of_average_cell + 1];
+	v_av_new = new double[Number_of_average_cell + 1];
+	y_av_new_x = new double[Number_of_average_cell + 1];
+	y_av_new_y = new double[Number_of_average_cell + 1];
+	y_av_new_z = new double[Number_of_average_cell + 1];
+	y_av_x = new double[Number_of_average_cell + 1];
+	y_av_y = new double[Number_of_average_cell + 1];
+	y_av_z = new double[Number_of_average_cell + 1];
+	beta_cell = new double[Number_of_average_cell + 1];
 
-	for (dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-	{
-		v_d_average[dust_id] = new double[Number_of_dust_cell + 1];
-		rho_d_average[dust_id] = new double[Number_of_dust_cell + 1];
-		eps_cell[dust_id] = new double[Number_of_dust_cell + 1];
-		d_average_count[dust_id] = new int[Number_of_dust_cell + 1];
-		t_stop_average[dust_id] = new double[Number_of_dust_cell + 1];
-		x_av_new[dust_id] = new double[Number_of_dust_cell + 1];
-		x_av[dust_id] = new double[Number_of_dust_cell + 1];
-		u_av_new[dust_id] = new double[Number_of_dust_cell + 1];
-		b_cell[dust_id] = new double[Number_of_dust_cell + 1];
-	}
-
-	cell_dust_width = Coeff_h_dust_cell * h; 
-	for (i = 0; i <= Number_of_dust_cell; i++)
+	Vx_d_average_1 = new double[Number_of_average_cell + 1];
+	Vy_d_average_1 = new double[Number_of_average_cell + 1];
+	Vz_d_average_1 = new double[Number_of_average_cell + 1];
+	rho_d_average_1 = new double[Number_of_average_cell + 1];
+	eps_cell_1 = new double[Number_of_average_cell + 1];
+	d_average_count_1 = new int[Number_of_average_cell + 1];
+	t_stop_average_1 = new double[Number_of_average_cell + 1];
+	x_av_new_x_1 = new double[Number_of_average_cell + 1];
+	x_av_new_y_1 = new double[Number_of_average_cell + 1];
+	x_av_new_z_1 = new double[Number_of_average_cell + 1];
+	x_av_x_1 = new double[Number_of_average_cell + 1];
+	x_av_y_1 = new double[Number_of_average_cell + 1];
+	x_av_z_1 = new double[Number_of_average_cell + 1];
+	u_av_new_1 = new double[Number_of_average_cell + 1];
+	b_cell_1 = new double[Number_of_average_cell + 1];
+	
+	Vx_d_average_2 = new double[Number_of_average_cell + 1];
+	Vy_d_average_2 = new double[Number_of_average_cell + 1];
+	Vz_d_average_2 = new double[Number_of_average_cell + 1];
+	rho_d_average_2 = new double[Number_of_average_cell + 1];
+	eps_cell_2 = new double[Number_of_average_cell + 1];
+	d_average_count_2 = new int[Number_of_average_cell + 1];
+	t_stop_average_2 = new double[Number_of_average_cell + 1];
+	x_av_new_x_2 = new double[Number_of_average_cell + 1];
+	x_av_new_y_2 = new double[Number_of_average_cell + 1];
+	x_av_new_z_2 = new double[Number_of_average_cell + 1];
+	x_av_x_2 = new double[Number_of_average_cell + 1];
+	x_av_y_2 = new double[Number_of_average_cell + 1];
+	x_av_z_2 = new double[Number_of_average_cell + 1];
+	u_av_new_2 = new double[Number_of_average_cell + 1];
+	b_cell_2 = new double[Number_of_average_cell + 1];
+		
+	for (i = 0; i <= Number_of_average_cell; i++)
 	{
 		//x_dust_cell[i] = (double) X_min + i * cell_dust_width;
 		//x_dust_cell[i] = (double) Y_min + i * cell_dust_width;
 		//z_dust_cell[i] = (double) Y_min + i * cell_dust_width;
-		v_g_average[i] = 0.0;
+		Vx_g_average[i] = 0.0; 
+		Vy_g_average[i] = 0.0; 
+		Vz_g_average[i] = 0.0;
 		rho_g_average[i] = 0.0;
 		e_g_average[i] = 0.0;
 		g_average_count[i] = 0;
-		Psi_av_new[i] = 0.0;
+		Psi_av_new_x[i] = 0.0;
+		Psi_av_new_y[i] = 0.0;
+		Psi_av_new_z[i] = 0.0;
 		v_av_new[i] = 0.0;
-		y_av_new[i] = 0.0;
-		y_av[i] = 0.0;
-		for (dust_id = 0; dust_id < Num_dust_sort; dust_id++)
-		{
-			v_d_average[dust_id][i] = 0.0;
-			rho_d_average[dust_id][i] = 0.0;
-			eps_cell[dust_id][i] = 0.0;
-			t_stop_average[dust_id][i] = 0.0;
-			d_average_count[dust_id][i] = 0;
-			x_av_new[dust_id][i] = 0.0;
-			x_av[dust_id][i] = 0.0;
-			u_av_new[dust_id][i] = 0.0;
-			b_cell[dust_id][i] = 0.0;
-		}
+		y_av_new_x[i] = 0.0;
+		y_av_new_y[i] = 0.0;
+		y_av_new_y[i] = 0.0;
+		y_av_x[i] = 0.0;
+		y_av_y[i] = 0.0;
+		y_av_z[i] = 0.0;
+
+		Vx_d_average_1[i] = 0.0; 
+		Vy_d_average_1[i] = 0.0; 
+		Vz_d_average_1[i] = 0.0;
+		rho_d_average_1[i] = 0.0;
+		eps_cell_1[i] = 0.0;
+		t_stop_average_1[i] = 0.0;
+		d_average_count_1[i] = 0;
+		x_av_new_x_1[i] = 0.0;
+		x_av_new_y_1[i] = 0.0;
+		x_av_new_z_1[i] = 0.0;
+		x_av_x_1[i] = 0.0;
+		x_av_y_1[i] = 0.0;
+		x_av_z_1[i] = 0.0;
+		u_av_new_1[i] = 0.0;
+		b_cell_1[i] = 0.0;
+
+		Vx_d_average_2[i] = 0.0;
+		Vy_d_average_2[i] = 0.0;
+		Vz_d_average_2[i] = 0.0;
+		rho_d_average_2[i] = 0.0;
+		eps_cell_2[i] = 0.0;
+		t_stop_average_2[i] = 0.0;
+		d_average_count_2[i] = 0;
+		x_av_new_x_2[i] = 0.0;
+		x_av_new_y_2[i] = 0.0;
+		x_av_new_z_2[i] = 0.0;
+		x_av_x_2[i] = 0.0;
+		x_av_y_2[i] = 0.0;
+		x_av_z_2[i] = 0.0;
+		u_av_new_2[i] = 0.0;
+		b_cell_2[i] = 0.0;
+		
 	}
-*/
+
 }
 
 
@@ -1334,8 +1391,9 @@ int main()
 
 {
 
+	double tmp1;
 
-	FILE *ini_file;
+	FILE *ini_file, * out_file;
 	char s[128];
 //	fopen_s(&ini_file, "Init.txt", "r");
 	ini_file = fopen("Init.txt", "r");
@@ -1442,7 +1500,7 @@ int main()
 	cudaMalloc((void**)&dev_e_gas, (Pm + 1) * sizeof(double));
 	cudaMalloc((void**)&dev_mas_gas, (Pm + 1) * sizeof(double));
 	cudaMalloc((void**)&dev_ind_gas, (Pm + 1) * sizeof(int));
-	cudaMalloc((void**)&dev_Cell_gas, (Number_of_fihd_cells) * sizeof(int));
+	cudaMalloc((void**)&dev_Cell_gas, (Number_of_fihd_cells+1) * sizeof(int));
 	cudaMalloc((void**)&dev_Nn_gas, (Pm + 1) * sizeof(int));
 	cudaMalloc((void**)&dev_e_temp, (Pm + 1) * sizeof(double));
 	
@@ -1458,8 +1516,9 @@ int main()
 		cudaMalloc((void**)&dev_Az_dust_1, (Pm + 1) * sizeof(double));
 		cudaMalloc((void**)&dev_rho_dust_1, (Pm + 1) * sizeof(double));
 		cudaMalloc((void**)&dev_mas_dust_1, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_t_stop_1, (Pm + 1) * sizeof(double));
 		cudaMalloc((void**)&dev_ind_dust_1, (Pm + 1) * sizeof(int));
-		cudaMalloc((void**)&dev_Cell_dust_1, (Number_of_fihd_cells) * sizeof(int));
+		cudaMalloc((void**)&dev_Cell_dust_1, (Number_of_fihd_cells+1) * sizeof(int));
 		cudaMalloc((void**)&dev_Nn_dust_1, (Pm + 1) * sizeof(int));
 
 
@@ -1474,10 +1533,29 @@ int main()
 		cudaMalloc((void**)&dev_Az_dust_2, (Pm + 1) * sizeof(double));
 		cudaMalloc((void**)&dev_rho_dust_2, (Pm + 1) * sizeof(double));
 		cudaMalloc((void**)&dev_mas_dust_2, (Pm + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_t_stop_2, (Pm + 1) * sizeof(double));
 		cudaMalloc((void**)&dev_ind_dust_2, (Pm + 1) * sizeof(int));
-		cudaMalloc((void**)&dev_Cell_dust_2, (Number_of_fihd_cells) * sizeof(int));
+		cudaMalloc((void**)&dev_Cell_dust_2, (Number_of_fihd_cells+1) * sizeof(int));
 		cudaMalloc((void**)&dev_Nn_dust_2, (Pm + 1) * sizeof(int));
+		
+		cudaMalloc((void**)&dev_Psi_av_new_x, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Psi_av_new_y, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Psi_av_new_z, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_e_temp, (Pm + 1) * sizeof(double));
 
+		cudaMalloc((void**)&dev_Vx_g_average, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vy_g_average, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vz_g_average, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vx_d_average_1, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vy_d_average_1, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vz_d_average_1, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vx_d_average_2, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vy_d_average_2, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_Vz_d_average_2, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_t_stop_average_1, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_t_stop_average_2, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_eps_cell_1, (Number_of_average_cell + 1) * sizeof(double));
+		cudaMalloc((void**)&dev_eps_cell_2, (Number_of_average_cell + 1) * sizeof(double));
 
 
 	dim3 gridSize = dim3(Pm / 256 + 1, 1, 1);  
@@ -1489,6 +1567,57 @@ int main()
 	Data_out(out_num);
 	Data_out_dust(out_num);
 	out_num = out_num + 1;
+
+
+	cudaMemcpy(dev_x_gas, x_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_y_gas, y_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_z_gas, z_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_rho_gas, rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_p_gas, p_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_mas_gas, mas_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_e_gas, e_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vx_gas, Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vy_gas, Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vz_gas, Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Ax_gas, Ax_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Ay_gas, Ay_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Az_gas, Az_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_ind_gas, Ind_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Cell_gas, Cell_gas, (Number_of_fihd_cells+1) * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Nn_gas, Nn_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+
+
+	cudaMemcpy(dev_x_dust_1, x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_y_dust_1, y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_z_dust_1, z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vx_dust_1, Vx_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vy_dust_1, Vy_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vz_dust_1, Vz_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Ax_dust_1, Ax_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Ay_dust_1, Ay_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Az_dust_1, Az_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_rho_dust_1, rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_t_stop_1, t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_mas_dust_1, mas_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_ind_dust_1, ind_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Cell_dust_1, Cell_dust_1, (Number_of_fihd_cells+1) * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Nn_dust_1, Nn_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(dev_x_dust_2, x_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_y_dust_2, y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_z_dust_2, z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vx_dust_2, Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vy_dust_2, Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Vz_dust_2, Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Ax_dust_2, Ax_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Ay_dust_2, Ay_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Az_dust_2, Az_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_rho_dust_2, rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_t_stop_2, t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_mas_dust_2, mas_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_ind_dust_2, ind_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Cell_dust_2, Cell_dust_2, (Number_of_fihd_cells+1) * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_Nn_dust_2, Nn_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
 
 	do
@@ -1518,7 +1647,7 @@ int main()
 				else { Nn_gas[Ne_gas[i]] = p; Ne_gas[i] = p; Nn_gas[p] = -1; };
 			}
 		}
-		
+
 		for (i = 0; i <= Number_of_fihd_cells; i++)
 		{
 			Cell_dust_1[i] = -1;
@@ -1559,54 +1688,17 @@ int main()
 			}
 		}
 
-		cudaMemcpy(dev_x_gas, x_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_y_gas, y_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_z_gas, z_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_rho_gas, rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_p_gas, p_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_mas_gas, mas_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_e_gas, e_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vx_gas, Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vy_gas, Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vz_gas, Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ax_gas, Ax_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ay_gas, Ay_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Az_gas, Az_gas, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_ind_gas, Ind_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Cell_gas, Cell_gas, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyHostToDevice);
+
+
+
+
+		cudaMemcpy(dev_Cell_gas, Cell_gas, (Number_of_fihd_cells+1) * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Nn_gas, Nn_gas, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
-
-		cudaMemcpy(dev_x_dust_1, x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_y_dust_1, y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_z_dust_1, z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vx_dust_1, Vx_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vy_dust_1, Vy_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vz_dust_1, Vz_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ax_dust_1, Ax_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ay_dust_1, Ay_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Az_dust_1, Az_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_rho_dust_1, rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_t_stop_1, t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_mas_dust_1, mas_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_ind_dust_1, ind_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Cell_dust_1, Cell_dust_1, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Cell_dust_1, Cell_dust_1, (Number_of_fihd_cells+1) * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Nn_dust_1, Nn_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
-		cudaMemcpy(dev_x_dust_2, x_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_y_dust_2, y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_z_dust_2, z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vx_dust_2, Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vy_dust_2, Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Vz_dust_2, Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ax_dust_2, Ax_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Ay_dust_2, Ay_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Az_dust_2, Az_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_rho_dust_2, rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_t_stop_2, t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_mas_dust_2, mas_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_ind_dust_2, ind_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
-		cudaMemcpy(dev_Cell_dust_2, Cell_dust_2, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Cell_dust_2, Cell_dust_2, (Number_of_fihd_cells+1) * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(dev_Nn_dust_2, Nn_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
 
@@ -1625,16 +1717,17 @@ int main()
 		PKernel << <gridSize, blockSize >> > (dev_rho_gas, dev_p_gas, dev_e_gas, dev_ind_gas, Pm, Type_of_state, Gam_g, Speed_of_sound_gas);
 		cudaDeviceSynchronize();
 
+		cudaMemcpy(rho_gas, dev_rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(p_gas, dev_p_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 
-	
 		for (k = -1; k <= 1; k++)
 			for (l = -1; l <= 1; l++)
 				for (g = -1; g <= 1; g++)
-					{
+				{
 					Rho_Kernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_1, dev_y_dust_1, dev_z_dust_1, dev_rho_dust_1, dev_mas_dust_1, dev_ind_dust_1, dev_Cell_dust_1, dev_Nn_dust_1, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Number_of_fihd_cells, h, k, l, g);
 					cudaDeviceSynchronize();
-					}
-		
+				}
+
 		for (k = -1; k <= 1; k++)
 			for (l = -1; l <= 1; l++)
 				for (g = -1; g <= 1; g++)
@@ -1643,81 +1736,523 @@ int main()
 					cudaDeviceSynchronize();
 				}
 
+		cudaMemcpy(rho_dust_1, dev_rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(rho_dust_2, dev_rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
 		
 		t_stop_Kernel_IDIC << <gridSize, blockSize >> > (dev_t_stop_1, dev_p_gas, dev_rho_gas, dev_ind_dust_1, Pm, R_dust_1, Gam_g);
 		cudaDeviceSynchronize();
-
+				
 		t_stop_Kernel_IDIC << <gridSize, blockSize >> > (dev_t_stop_2, dev_p_gas, dev_rho_gas, dev_ind_dust_2, Pm, R_dust_2, Gam_g);
+		 cudaDeviceSynchronize();
+
+		cudaMemcpy(t_stop_1, dev_t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(t_stop_2, dev_t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		
+		
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			Vx_g_average[i] = 0.0;
+			Vy_g_average[i] = 0.0;
+			Vz_g_average[i] = 0.0;
+			rho_g_average[i] = 0.0;
+			e_g_average[i] = 0.0;
+			g_average_count[i] = 0;
+			Psi_av_new_x[i] = 0.0;
+			Psi_av_new_y[i] = 0.0;
+			Psi_av_new_z[i] = 0.0;
+			v_av_new[i] = 0.0;
+			y_av_new_x[i] = 0.0;
+			y_av_new_y[i] = 0.0;
+			y_av_new_z[i] = 0.0;
+			y_av_x[i] = 0.0;
+			y_av_y[i] = 0.0;
+			y_av_z[i] = 0.0;
+
+			Vx_d_average_1[i] = 0.0;
+			Vy_d_average_1[i] = 0.0;
+			Vz_d_average_1[i] = 0.0;
+			rho_d_average_1[i] = 0.0;
+			eps_cell_1[i] = 0.0;
+			t_stop_average_1[i] = 0.0;
+			d_average_count_1[i] = 0;
+			x_av_new_x_1[i] = 0.0;
+			x_av_new_y_1[i] = 0.0;
+			x_av_new_z_1[i] = 0.0;
+			x_av_x_1[i] = 0.0;
+			x_av_y_1[i] = 0.0;
+			x_av_z_1[i] = 0.0;
+			u_av_new_1[i] = 0.0;
+			b_cell_1[i] = 0.0;
+
+			Vx_d_average_2[i] = 0.0;
+			Vy_d_average_2[i] = 0.0;
+			Vz_d_average_2[i] = 0.0;
+			rho_d_average_2[i] = 0.0;
+			eps_cell_2[i] = 0.0;
+			t_stop_average_2[i] = 0.0;
+			d_average_count_2[i] = 0;
+			x_av_new_x_2[i] = 0.0;
+			x_av_new_y_2[i] = 0.0;
+			x_av_new_z_2[i] = 0.0;
+			x_av_x_2[i] = 0.0;
+			x_av_y_2[i] = 0.0;
+			x_av_z_2[i] = 0.0;
+			u_av_new_2[i] = 0.0;
+			b_cell_2[i] = 0.0;
+
+		}
+
+
+		for (p = 0; p <= Pm; p++)
+		{
+			cell_num = int((x_gas[p] - X_min) / average_cell_width) + (int((y_gas[p] - Y_min) / average_cell_width)) * Number_of_average_cell_x + (int((z_gas[p] - Z_min) / average_cell_width)) * Number_of_average_cell_x * Number_of_average_cell_y;
+			g_average_count[cell_num] = g_average_count[cell_num] + 1;
+			Vx_g_average[cell_num] = Vx_g_average[cell_num] + Vx_gas[p];
+			Vy_g_average[cell_num] = Vy_g_average[cell_num] + Vy_gas[p];
+			Vz_g_average[cell_num] = Vz_g_average[cell_num] + Vz_gas[p];
+			rho_g_average[cell_num] = rho_g_average[cell_num] + rho_gas[p];
+			e_g_average[cell_num] = e_g_average[cell_num] + e_gas[p];
+		}
+
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			if (g_average_count[i] > 0)
+			{
+				Vx_g_average[i] = Vx_g_average[i] / g_average_count[i];
+				Vy_g_average[i] = Vy_g_average[i] / g_average_count[i];
+				Vz_g_average[i] = Vz_g_average[i] / g_average_count[i];
+				e_g_average[i] = e_g_average[i] / g_average_count[i];
+			}
+		}
+
+		for (p = 0; p <= Pm; p++)
+		{
+			cell_num = int((x_dust_1[p] - X_min) / average_cell_width) + (int((y_dust_1[p] - Y_min) / average_cell_width)) * Number_of_average_cell_x + (int((z_dust_1[p] - Z_min) / average_cell_width)) * Number_of_average_cell_x * Number_of_average_cell_y;
+			d_average_count_1[cell_num] = d_average_count_1[cell_num] + 1;
+			t_stop_average_1[cell_num] = t_stop_average_1[cell_num] + t_stop_1[p];
+			Vx_d_average_1[cell_num] = Vx_d_average_1[cell_num] + Vx_dust_1[p];
+			Vy_d_average_1[cell_num] = Vy_d_average_1[cell_num] + Vy_dust_1[p];
+			Vz_d_average_1[cell_num] = Vz_d_average_1[cell_num] + Vz_dust_1[p];
+			rho_d_average_1[cell_num] = rho_d_average_1[cell_num] + rho_dust_1[p];
+		}
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			if (d_average_count_1[i] > 0)
+			{
+				Vx_d_average_1[i] = Vx_d_average_1[i] / d_average_count_1[i];
+				Vy_d_average_1[i] = Vy_d_average_1[i] / d_average_count_1[i];
+				Vz_d_average_1[i] = Vz_d_average_1[i] / d_average_count_1[i];
+				rho_d_average_1[i] = rho_d_average_1[i] / d_average_count_1[i];
+				t_stop_average_1[i] = t_stop_average_1[i] / d_average_count_1[i];
+			}
+			else
+			{
+				t_stop_average_1[i] = 1.0;
+			}
+		}
+
+		
+		for (p = 0; p <= Pm; p++)
+		{
+			cell_num = int((x_dust_2[p] - X_min) / average_cell_width) + (int((y_dust_2[p] - Y_min) / average_cell_width)) * Number_of_average_cell_x + (int((z_dust_2[p] - Z_min) / average_cell_width)) * Number_of_average_cell_x * Number_of_average_cell_y;
+			d_average_count_2[cell_num] = d_average_count_2[cell_num] + 1;
+			t_stop_average_2[cell_num] = t_stop_average_2[cell_num] + t_stop_2[p];
+			Vx_d_average_2[cell_num] = Vx_d_average_2[cell_num] + Vx_dust_2[p];
+			Vy_d_average_2[cell_num] = Vy_d_average_2[cell_num] + Vy_dust_2[p];
+			Vz_d_average_2[cell_num] = Vz_d_average_2[cell_num] + Vz_dust_2[p];
+			rho_d_average_2[cell_num] = rho_d_average_2[cell_num] + rho_dust_2[p];
+		}
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			if (d_average_count_2[i] > 0)
+			{
+				Vx_d_average_2[i] = Vx_d_average_2[i] / d_average_count_2[i];
+				Vy_d_average_2[i] = Vy_d_average_2[i] / d_average_count_2[i];
+				Vz_d_average_2[i] = Vz_d_average_2[i] / d_average_count_2[i];
+				rho_d_average_2[i] = rho_d_average_2[i] / d_average_count_2[i];
+				t_stop_average_2[i] = t_stop_average_2[i] / d_average_count_2[i];
+			}
+			else
+			{
+				t_stop_average_2[i] = 1.0;
+			}
+		}
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			if ((g_average_count[i] > 0) && (d_average_count_1[i] > 0))
+			{
+				eps_cell_1[i] = d_average_count_1[i] * mas_gas_dust_1 / g_average_count[i];
+			}
+			else
+			{
+				eps_cell_1[i] = 0.5;
+			}
+
+			if ((g_average_count[i] > 0) && (d_average_count_1[i] > 0))
+			{
+				eps_cell_2[i] = d_average_count_2[i] * mas_gas_dust_2 / g_average_count[i];
+			}
+			else
+			{
+				eps_cell_2[i] = 0.33;
+			}
+		}
+/*
+		out_file = fopen("Data/Cell_av.dat", "wt");
+		fprintf(out_file, "t=%5.3f \n", Tm);
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			fprintf(out_file, "%d \t %d \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf  \n",
+				i, g_average_count[i], Vx_g_average[i], Vy_g_average[i], Vz_g_average[i], e_g_average[i], d_average_count_1[i], Vx_d_average_1[i], Vy_d_average_1[i], Vz_d_average_1[i], rho_d_average_1[i], eps_cell_1[i], t_stop_average_1[i],
+				d_average_count_2[i], Vx_d_average_2[i], Vy_d_average_2[i], Vz_d_average_2[i], rho_d_average_2[i], eps_cell_2[i], t_stop_average_2[i]);
+
+		}
+		fclose(out_file);
+
+	*/	
+
+	//	cudaMemcpy(dev_Psi_av_new_x, Psi_av_new_x, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	//	cudaMemcpy(dev_Psi_av_new_y, Psi_av_new_y, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+	//	cudaMemcpy(dev_Psi_av_new_z, Psi_av_new_z, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+
+	
+
+		EnergyInitKernel_IDIC << <gridSize, blockSize >> > (dev_e_temp, dev_ind_gas, Pm);
+		cudaDeviceSynchronize();
+
+/*
+		PsiInitKernel_IDIC << <gridSize, blockSize >> > (dev_Psi_av_new_x, dev_Psi_av_new_y, dev_Psi_av_new_z, Number_of_average_cell);
 		cudaDeviceSynchronize();
 
 
-	/*	ForceInitKernel << <gridSize, blockSize >> > (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_e_temp, Pm);
+		for (k = -1; k <= 1; k++)
+			for (l = -1; l <= 1; l++)
+				for (g = -1; g <= 1; g++)
+				{
+					PsiKernel_IDIC << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_ind_gas, dev_Cell_gas, dev_Nn_gas, dev_e_temp, dev_Psi_av_new_x, dev_Psi_av_new_y, dev_Psi_av_new_z, Pm, Clx, Cly, Clz, Clh, Cnx, 
+						Cny, Number_of_fihd_cells, h, X_min, Y_min, Z_min, average_cell_width, Number_of_average_cell_x, Number_of_average_cell_y, Number_of_average_cell, Gam_g, alpha, beta, eps, k, l, g);
+					cudaDeviceSynchronize();
+				}
+
+		cudaMemcpy(Psi_av_new_x, dev_Psi_av_new_x, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Psi_av_new_y, dev_Psi_av_new_y, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Psi_av_new_z, dev_Psi_av_new_z, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
+
+		EnergyKernel_IDIC << <gridSize, blockSize >> > (dev_e_gas, dev_e_temp, dev_ind_gas, tau, Pm);
+		cudaDeviceSynchronize();
+
+		cudaMemcpy(e_gas, dev_e_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+*/
+
+		Force_InitKernel_IDIC << <gridSize, blockSize >> > (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_ind_gas, Pm);
 		cudaDeviceSynchronize();
 
 		for (k = -1; k <= 1; k++)
 			for (l = -1; l <= 1; l++)
 				for (g = -1; g <= 1; g++)
 				{
-					ForceKernel << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_e_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_e_temp, dev_Ind_gas, dev_Cell, dev_Nn, Pm, Clx, Cly, Clz, Clh, Cnx, Cny, Cl, h, tau, Gam_g, alpha, beta, eps, k, l, g);
+					ForceKernel_IDIC << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_rho_gas, dev_p_gas, dev_mas_gas, dev_e_temp, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_ind_gas, dev_Cell_gas, dev_Nn_gas, Pm, Clx, Cly, Clz, Clh, Cnx,
+						Cny, Number_of_fihd_cells, h, tau , Gam_g, alpha, beta, eps, k, l, g);
 					cudaDeviceSynchronize();
 				}
 
-
-		MoveKernel << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_Ind_gas, dev_e_temp, dev_e_gas, tau, Pm);
-		cudaDeviceSynchronize();
-
-
-	*/
-		cudaMemcpy(x_gas, dev_x_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(y_gas, dev_y_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(z_gas, dev_z_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(rho_gas, dev_rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(p_gas, dev_p_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(mas_gas, dev_mas_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(e_gas, dev_e_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Vx_gas, dev_Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Vy_gas, dev_Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Vz_gas, dev_Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Ax_gas, dev_Ax_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Ay_gas, dev_Ay_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Az_gas, dev_Az_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+/*
+		out_file = fopen("Data/A.dat", "wt");
+		fprintf(out_file, "t=%5.3f \n", Tm);
+		for (i = 0; i <= Pm; i++)
+		{
+			fprintf(out_file, "%d \t %10.8lf \t %10.8lf \t %10.8lf \n",
+				i, Ax_gas[i], Ay_gas[i], Az_gas[i]);
 
-		cudaMemcpy(x_dust_1, dev_x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(y_dust_1, dev_y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(z_dust_1, dev_z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		}
+		fclose(out_file);
+		
+			out_file = fopen("Data/Cell_Psi.dat", "wt");
+			fprintf(out_file, "t=%5.3f \n", Tm);
+			for (i = 0; i <= Number_of_average_cell; i++)
+			{
+				fprintf(out_file, "%d \t %10.8lf \t %10.8lf \t %10.8lf \n",
+					i, Psi_av_new_x[i], Psi_av_new_y[i], Psi_av_new_z[i]);
+
+			}
+			fclose(out_file);
+*/
+		
+
+		for (p = 0; p <= Pm; p++)
+		{
+			cell_num = int((x_gas[p] - X_min) / average_cell_width) + (int((y_gas[p] - Y_min) / average_cell_width)) * Number_of_average_cell_x + (int((z_gas[p] - Z_min) / average_cell_width)) * Number_of_average_cell_x * Number_of_average_cell_y;
+			Psi_av_new_x[cell_num] = Psi_av_new_x[cell_num] + Ax_gas[p];
+			Psi_av_new_y[cell_num] = Psi_av_new_y[cell_num] + Ay_gas[p];
+			Psi_av_new_z[cell_num] = Psi_av_new_z[cell_num] + Az_gas[p];
+		}
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			if (g_average_count[i] > 0)
+			{
+				Psi_av_new_x[i] = Psi_av_new_x[i] / g_average_count[i];
+				Psi_av_new_y[i] = Psi_av_new_y[i] / g_average_count[i];
+				Psi_av_new_z[i] = Psi_av_new_z[i] / g_average_count[i];
+			}
+			y_av_x[i] = Vx_g_average[i];
+			y_av_y[i] = Vy_g_average[i];
+			y_av_z[i] = Vz_g_average[i];
+			
+			x_av_x_1[i] = Vx_g_average[i] - Vx_d_average_1[i];
+			x_av_y_1[i] = Vy_g_average[i] - Vy_d_average_1[i];
+			x_av_z_1[i] = Vz_g_average[i] - Vz_d_average_1[i];
+			
+			x_av_x_2[i] = Vx_g_average[i] - Vx_d_average_2[i];
+			x_av_y_2[i] = Vy_g_average[i] - Vy_d_average_2[i];
+			x_av_z_2[i] = Vz_g_average[i] - Vz_d_average_2[i];
+
+			y_av_x[i] = y_av_x[i] + eps_cell_1[i] * Vx_d_average_1[i] + eps_cell_2[i] * Vx_d_average_2[i];
+			y_av_y[i] = y_av_y[i] + eps_cell_1[i] * Vy_d_average_1[i] + eps_cell_2[i] * Vy_d_average_2[i];
+			y_av_z[i] = y_av_z[i] + eps_cell_1[i] * Vz_d_average_1[i] + eps_cell_2[i] * Vz_d_average_2[i];
+
+			b_cell_1[i] = (t_stop_average_1[i] + tau) / (eps_cell_1[i] * tau);
+			b_cell_2[i] = (t_stop_average_2[i] + tau) / (eps_cell_2[i] * tau);
+
+		}
+/*
+		out_file = fopen("Data/Cell_Psi.dat", "wt");
+		fprintf(out_file, "t=%5.3f \n", Tm);
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			fprintf(out_file, "%d \t %10.8lf \t %10.8lf \t %10.8lf \n",
+				i, Psi_av_new_x[i], Psi_av_new_y[i], Psi_av_new_z[i]);
+
+		}
+		fclose(out_file);
+*/
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			beta_cell[i] = 1.0;
+			beta_cell[i] = beta_cell[i] + 1.0 / b_cell_1[i] + 1.0 / b_cell_2[i];
+		}
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			y_av_new_x[i] = y_av_x[i] + tau * Psi_av_new_x[i];
+			y_av_new_y[i] = y_av_y[i] + tau * Psi_av_new_y[i];
+			y_av_new_z[i] = y_av_z[i] + tau * Psi_av_new_z[i];
+
+			x_av_new_x_1[i] = -1.0 * b_cell_1[i] * beta_cell[i] * (x_av_x_1[i] + tau * Psi_av_new_x[i]) / (b_cell_1[i] * b_cell_1[i]);
+			x_av_new_y_1[i] = -1.0 * b_cell_1[i] * beta_cell[i] * (x_av_y_1[i] + tau * Psi_av_new_y[i]) / (b_cell_1[i] * b_cell_1[i]);
+			x_av_new_z_1[i] = -1.0 * b_cell_1[i] * beta_cell[i] * (x_av_z_1[i] + tau * Psi_av_new_z[i]) / (b_cell_1[i] * b_cell_1[i]);
+
+			x_av_new_x_1[i] = x_av_new_x_1[i] + (x_av_x_1[i] + tau * Psi_av_new_x[i]) / (b_cell_1[i] * b_cell_1[i]) + (x_av_x_2[i] + tau * Psi_av_new_x[i]) / (b_cell_1[i] * b_cell_2[i]);
+			x_av_new_y_1[i] = x_av_new_y_1[i] + (x_av_y_1[i] + tau * Psi_av_new_y[i]) / (b_cell_1[i] * b_cell_1[i]) + (x_av_y_2[i] + tau * Psi_av_new_y[i]) / (b_cell_1[i] * b_cell_2[i]);
+			x_av_new_z_1[i] = x_av_new_z_1[i] + (x_av_z_1[i] + tau * Psi_av_new_z[i]) / (b_cell_1[i] * b_cell_1[i]) + (x_av_z_2[i] + tau * Psi_av_new_z[i]) / (b_cell_1[i] * b_cell_2[i]);
+
+			x_av_new_x_1[i] = x_av_new_x_1[i] * (-1.0 * t_stop_average_1[i]) / (tau * eps_cell_1[i] * beta_cell[i]);
+			x_av_new_y_1[i] = x_av_new_y_1[i] * (-1.0 * t_stop_average_1[i]) / (tau * eps_cell_1[i] * beta_cell[i]);
+			x_av_new_z_1[i] = x_av_new_z_1[i] * (-1.0 * t_stop_average_1[i]) / (tau * eps_cell_1[i] * beta_cell[i]);
+
+
+
+			x_av_new_x_2[i] = -1.0 * b_cell_2[i] * beta_cell[i] * (x_av_x_2[i] + tau * Psi_av_new_x[i]) / (b_cell_2[i] * b_cell_2[i]);
+			x_av_new_y_2[i] = -1.0 * b_cell_2[i] * beta_cell[i] * (x_av_y_2[i] + tau * Psi_av_new_y[i]) / (b_cell_2[i] * b_cell_2[i]);
+			x_av_new_z_2[i] = -1.0 * b_cell_2[i] * beta_cell[i] * (x_av_z_2[i] + tau * Psi_av_new_z[i]) / (b_cell_2[i] * b_cell_2[i]);
+
+			x_av_new_x_2[i] = x_av_new_x_2[i] + (x_av_x_1[i] + tau * Psi_av_new_x[i]) / (b_cell_2[i] * b_cell_1[i]) + (x_av_x_2[i] + tau * Psi_av_new_x[i]) / (b_cell_2[i] * b_cell_2[i]);
+			x_av_new_y_2[i] = x_av_new_y_2[i] + (x_av_y_1[i] + tau * Psi_av_new_y[i]) / (b_cell_2[i] * b_cell_1[i]) + (x_av_y_2[i] + tau * Psi_av_new_y[i]) / (b_cell_2[i] * b_cell_2[i]);
+			x_av_new_z_2[i] = x_av_new_z_2[i] + (x_av_z_1[i] + tau * Psi_av_new_z[i]) / (b_cell_2[i] * b_cell_1[i]) + (x_av_z_2[i] + tau * Psi_av_new_z[i]) / (b_cell_2[i] * b_cell_2[i]);
+
+			x_av_new_x_2[i] = x_av_new_x_2[i] * (-1.0 * t_stop_average_2[i]) / (tau * eps_cell_2[i] * beta_cell[i]);
+			x_av_new_y_2[i] = x_av_new_y_2[i] * (-1.0 * t_stop_average_2[i]) / (tau * eps_cell_2[i] * beta_cell[i]);
+			x_av_new_z_2[i] = x_av_new_z_2[i] * (-1.0 * t_stop_average_2[i]) / (tau * eps_cell_2[i] * beta_cell[i]);
+
+		}
+
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			tmp1 = 1.0;
+			tmp1 = tmp1 + eps_cell_1[i] + eps_cell_2[i];
+
+			Vx_g_average[i] = y_av_new_x[i];
+			Vy_g_average[i] = y_av_new_y[i];
+			Vz_g_average[i] = y_av_new_z[i];
+
+
+
+			Vx_g_average[i] = Vx_g_average[i] + eps_cell_1[i] * x_av_new_x_1[i];
+			Vy_g_average[i] = Vy_g_average[i] + eps_cell_1[i] * x_av_new_y_1[i];
+			Vz_g_average[i] = Vz_g_average[i] + eps_cell_1[i] * x_av_new_z_1[i];
+
+			Vx_d_average_1[i] = y_av_new_x[i];
+			Vy_d_average_1[i] = y_av_new_y[i];
+			Vz_d_average_1[i] = y_av_new_z[i];
+
+			Vx_d_average_1[i] = Vx_d_average_1[i] + eps_cell_2[i] * x_av_new_x_2[i];
+			Vy_d_average_1[i] = Vy_d_average_1[i] + eps_cell_2[i] * x_av_new_y_2[i];
+			Vz_d_average_1[i] = Vz_d_average_1[i] + eps_cell_2[i] * x_av_new_z_2[i];
+
+			Vx_d_average_1[i] = Vx_d_average_1[i] - (tmp1 - eps_cell_1[i]) * x_av_new_x_1[i];
+			Vy_d_average_1[i] = Vy_d_average_1[i] - (tmp1 - eps_cell_1[i]) * x_av_new_y_1[i];
+			Vz_d_average_1[i] = Vz_d_average_1[i] - (tmp1 - eps_cell_1[i]) * x_av_new_z_1[i];
+
+			Vx_d_average_1[i] = Vx_d_average_1[i] / tmp1;
+			Vy_d_average_1[i] = Vy_d_average_1[i] / tmp1;
+			Vz_d_average_1[i] = Vz_d_average_1[i] / tmp1;
+
+
+			Vx_g_average[i] = Vx_g_average[i] + eps_cell_2[i] * x_av_new_x_2[i];
+			Vy_g_average[i] = Vy_g_average[i] + eps_cell_2[i] * x_av_new_y_2[i];
+			Vz_g_average[i] = Vz_g_average[i] + eps_cell_2[i] * x_av_new_z_2[i];
+
+			Vx_d_average_2[i] = y_av_new_x[i];
+			Vy_d_average_2[i] = y_av_new_y[i];
+			Vz_d_average_2[i] = y_av_new_z[i];
+
+			Vx_d_average_2[i] = Vx_d_average_2[i] + eps_cell_1[i] * x_av_new_x_1[i];
+			Vy_d_average_2[i] = Vy_d_average_2[i] + eps_cell_1[i] * x_av_new_y_1[i];
+			Vz_d_average_2[i] = Vz_d_average_2[i] + eps_cell_1[i] * x_av_new_z_1[i];
+
+			Vx_d_average_2[i] = Vx_d_average_2[i] - (tmp1 - eps_cell_2[i]) * x_av_new_x_2[i];
+			Vy_d_average_2[i] = Vy_d_average_2[i] - (tmp1 - eps_cell_2[i]) * x_av_new_y_2[i];
+			Vz_d_average_2[i] = Vz_d_average_2[i] - (tmp1 - eps_cell_2[i]) * x_av_new_z_2[i];
+
+			Vx_d_average_2[i] = Vx_d_average_2[i] / tmp1;
+			Vy_d_average_2[i] = Vy_d_average_2[i] / tmp1;
+			Vz_d_average_2[i] = Vz_d_average_2[i] / tmp1;
+
+			Vx_g_average[i] = Vx_g_average[i] / tmp1;
+			Vy_g_average[i] = Vy_g_average[i] / tmp1;
+			Vz_g_average[i] = Vz_g_average[i] / tmp1;
+		}
+
+	/*	out_file = fopen("Data/Cell_av_new.dat", "wt");
+		fprintf(out_file, "t=%5.3f \n", Tm);
+		for (i = 0; i <= Number_of_average_cell; i++)
+		{
+			fprintf(out_file, "%d \t %d \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \n",
+				i, g_average_count[i], Vx_g_average[i], Vy_g_average[i], Vz_g_average[i], d_average_count_1[i], Vx_d_average_1[i], Vy_d_average_1[i], Vz_d_average_1[i], b_cell_1[i],
+				d_average_count_2[i], Vx_d_average_2[i], Vy_d_average_2[i], Vz_d_average_2[i], b_cell_2[i]);
+
+		}
+		fclose(out_file);
+		*/
+
+
+		cudaMemcpy(dev_Vx_g_average, Vx_g_average, (Number_of_average_cell  + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vy_g_average, Vy_g_average, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vz_g_average, Vz_g_average, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+
+		cudaMemcpy(dev_Vx_d_average_1, Vx_d_average_1, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vy_d_average_1, Vy_d_average_1, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vz_d_average_1, Vz_d_average_1, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_t_stop_average_1,  t_stop_average_1, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_eps_cell_1, eps_cell_1, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		
+		cudaMemcpy(dev_Vx_d_average_2, Vx_d_average_2, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vy_d_average_2, Vy_d_average_2, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Vz_d_average_2, Vz_d_average_2, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_t_stop_average_2, t_stop_average_2, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_eps_cell_2, eps_cell_2, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+
+		V_dustKernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_1, dev_y_dust_1, dev_z_dust_1, dev_Vx_dust_1, dev_Vy_dust_1, dev_Vz_dust_1, dev_Vx_g_average, dev_Vy_g_average, dev_Vz_g_average, dev_t_stop_average_1, dev_ind_dust_1,
+			X_min, Y_min, Z_min, average_cell_width, Number_of_average_cell_x, Number_of_average_cell_y, Number_of_average_cell, tau, Pm);
+		cudaDeviceSynchronize();
+
+		V_dustKernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_2, dev_y_dust_2, dev_z_dust_2, dev_Vx_dust_2, dev_Vy_dust_2, dev_Vz_dust_2, dev_Vx_g_average, dev_Vy_g_average, dev_Vz_g_average, dev_t_stop_average_2, dev_ind_dust_2,
+			X_min, Y_min, Z_min, average_cell_width, Number_of_average_cell_x, Number_of_average_cell_y, Number_of_average_cell, tau, Pm);
+
+
 		cudaMemcpy(Vx_dust_1, dev_Vx_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Vy_dust_1, dev_Vy_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Vz_dust_1, dev_Vz_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Ax_dust_1, dev_Ax_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Ay_dust_1, dev_Ay_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Az_dust_1, dev_Az_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(rho_dust_1, dev_rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(t_stop_1, dev_t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(mas_dust_1, dev_mas_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(ind_dust_1, dev_ind_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Cell_dust_1, dev_Cell_dust_1, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Nn_dust_1, dev_Nn_dust_1, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
+		
+		cudaMemcpy(Vx_dust_2, dev_Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vy_dust_2, dev_Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vz_dust_2, dev_Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 
+		cudaMemcpy(dev_Psi_av_new_x, Psi_av_new_x, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Psi_av_new_y, Psi_av_new_y, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(dev_Psi_av_new_z, Psi_av_new_z, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyHostToDevice);
+
+		V_gasKernel_IDIC << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_Vx_d_average_1, dev_Vy_d_average_1, dev_Vz_d_average_1, dev_Vx_d_average_2, dev_Vy_d_average_2, dev_Vz_d_average_2,
+			dev_Psi_av_new_x, dev_Psi_av_new_y, dev_Psi_av_new_z, dev_t_stop_average_1, dev_t_stop_average_2, dev_eps_cell_1, dev_eps_cell_2, dev_ind_gas, X_min, Y_min, Z_min, average_cell_width, Number_of_average_cell_x, Number_of_average_cell_y, Number_of_average_cell, tau, Pm);
+		cudaDeviceSynchronize();
+
+		cudaMemcpy(Vx_gas, dev_Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vy_gas, dev_Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(Vz_gas, dev_Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
+
+		MoveKernel_IDIC << <gridSize, blockSize >> > (dev_x_gas, dev_y_gas, dev_z_gas, dev_Vx_gas, dev_Vy_gas, dev_Vz_gas, dev_ind_gas, tau, Pm);
+		cudaDeviceSynchronize();
+
+		MoveKernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_1, dev_y_dust_1, dev_z_dust_1, dev_Vx_dust_1, dev_Vy_dust_1, dev_Vz_dust_1, dev_ind_dust_1, tau, Pm);
+		cudaDeviceSynchronize();
+
+		MoveKernel_IDIC << <gridSize, blockSize >> > (dev_x_dust_2, dev_y_dust_2, dev_z_dust_2, dev_Vx_dust_2, dev_Vy_dust_2, dev_Vz_dust_2, dev_ind_dust_2, tau, Pm);
+		cudaDeviceSynchronize();
+
+		cudaMemcpy(x_gas, dev_x_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(y_gas, dev_y_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(z_gas, dev_z_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		
+		cudaMemcpy(x_dust_1, dev_x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(y_dust_1, dev_y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(z_dust_1, dev_z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+		
 
 		cudaMemcpy(x_dust_2, dev_x_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(y_dust_2, dev_y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(z_dust_2, dev_z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Vx_dust_2, dev_Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Vy_dust_2, dev_Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Vz_dust_2, dev_Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Ax_dust_2, dev_Ax_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Ay_dust_2, dev_Ay_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Az_dust_2, dev_Az_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(rho_dust_2, dev_rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(t_stop_2, dev_t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(mas_dust_2, dev_mas_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(ind_dust_2, dev_ind_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Cell_dust_2, dev_Cell_dust_2, (Number_of_fihd_cells) * sizeof(int), cudaMemcpyDeviceToHost);
-		cudaMemcpy(Nn_dust_2, dev_Nn_dust_2, (Pm + 1) * sizeof(int), cudaMemcpyDeviceToHost);
+
+
+		
+
 
 
 		if (Tm >= out_num * T_out)
 		{
+
+			cudaMemcpy(x_gas, dev_x_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(y_gas, dev_y_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(z_gas, dev_z_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(rho_gas, dev_rho_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(p_gas, dev_p_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(e_gas, dev_e_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vx_gas, dev_Vx_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vy_gas, dev_Vy_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vz_gas, dev_Vz_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
+			cudaMemcpy(x_dust_1, dev_x_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(y_dust_1, dev_y_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(z_dust_1, dev_z_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vx_dust_1, dev_Vx_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vy_dust_1, dev_Vy_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vz_dust_1, dev_Vz_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(rho_dust_1, dev_rho_dust_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(t_stop_1, dev_t_stop_1, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
+
+			cudaMemcpy(x_dust_2, dev_x_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(y_dust_2, dev_y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(z_dust_2, dev_z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vx_dust_2, dev_Vx_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vy_dust_2, dev_Vy_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(Vz_dust_2, dev_Vz_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(rho_dust_2, dev_rho_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+			cudaMemcpy(t_stop_2, dev_t_stop_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
+
+
 			Data_out(out_num);
 			Data_out_dust(out_num);
 			out_num = out_num + 1;
