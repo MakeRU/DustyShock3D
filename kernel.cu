@@ -265,7 +265,7 @@ void Data_out(int num)
 	}
 
 	fclose(out_file_gas);
-/*
+
 	if (num < 10000000) { sprintf(out_name, "Data/L_X%d.dat", num); };
 	if (num < 1000000) { sprintf(out_name, "Data/L_X0%d.dat", num); };
 	if (num < 100000) { sprintf(out_name, "Data/L_X00%d.dat", num); };
@@ -293,6 +293,7 @@ void Data_out(int num)
 
 	fclose(out_file_gas);
 
+	/*
 	if (num < 10000000) { sprintf(out_name, "Data/L_Y%d.dat", num); };
 	if (num < 1000000) { sprintf(out_name, "Data/L_Y0%d.dat", num); };
 	if (num < 100000) { sprintf(out_name, "Data/L_Y00%d.dat", num); };
@@ -466,7 +467,7 @@ void Data_out_dust(int num)
 		}
 
 		fclose(out_file_dust);
-		/*
+
 		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_X%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_X0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-1-L_X00%d.dat", num); };
@@ -486,14 +487,14 @@ void Data_out_dust(int num)
 			{
 				r = sqrt(x_dust_1[i] * x_dust_1[i] + y_dust_1[i] * y_dust_1[i] + z_dust_1[i] * z_dust_1[i]);
 				v = sqrt(Vx_dust_1[i] * Vx_dust_1[i] + Vy_dust_1[i] * Vy_dust_1[i] + Vz_dust_1[i] * Vz_dust_1[i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], ind_dust_1[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_1[i], y_dust_1[i], z_dust_1[i], r, mas_dust_1[i], rho_dust_1[i], Vx_dust_1[i], Vy_dust_1[i], Vy_dust_1[i], v, Ax_dust_1[i], Ay_dust_1[i], Az_dust_1[i], t_stop_1[i], ind_dust_1[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
-
+		/*
 		if (num < 10000000) { sprintf(out_name, "Data/D-1-L_Y%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-1-L_Y0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-1-L_Y00%d.dat", num); };
@@ -657,7 +658,7 @@ void Data_out_dust(int num)
 		}
 
 		fclose(out_file_dust);
-/*
+
 		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_X%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_X0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-2-L_X00%d.dat", num); };
@@ -677,14 +678,14 @@ void Data_out_dust(int num)
 			{
 				r = sqrt(x_dust_2[i] * x_dust_2[i] + y_dust_2[i] * y_dust_2[i] + z_dust_2[i] * z_dust_2[i]);
 				v = sqrt(Vx_dust_2[i] * Vx_dust_2[i] + Vy_dust_2[i] * Vy_dust_2[i] + Vz_dust_2[i] * Vz_dust_2[i]);
-				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
-					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], ind_dust_2[i]);
+				fprintf(out_file_dust, "%10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %10.8lf \t %d \n",
+					x_dust_2[i], y_dust_2[i], z_dust_2[i], r, mas_dust_2[i], rho_dust_2[i], Vx_dust_2[i], Vy_dust_2[i], Vy_dust_2[i], v, Ax_dust_2[i], Ay_dust_2[i], Az_dust_2[i], t_stop_2[i], ind_dust_2[i]);
 			}
 
 		}
 
 		fclose(out_file_dust);
-
+		/*
 		if (num < 10000000) { sprintf(out_name, "Data/D-2-L_Y%d.dat", num); };
 		if (num < 1000000) { sprintf(out_name, "Data/D-2-L_Y0%d.dat", num); };
 		if (num < 100000) { sprintf(out_name, "Data/D-2-L_Y00%d.dat", num); };
@@ -1190,9 +1191,9 @@ void init_Dust_Ball()
 
 	//Num_dust_sort = 2;
 	Coeff_h_dust_cell = 0.5;
-	mas_gas_dust_1 = 0.5;
-	R_dust_1 = 0.05;
-	mas_gas_dust_2 = 0.3333;
+	mas_gas_dust_1 = 0.001;
+	R_dust_1 = 0.001;
+	mas_gas_dust_2 = 0.001;
 	R_dust_2 = 0.001;
 
 
@@ -1387,6 +1388,311 @@ void init_Dust_Ball()
 }
 
 
+void init_Sod_X_Dust()
+{
+	double x_temp, y_temp, z_temp;
+	double p_left, p_right, e_left, e_right, rho_left, rho_right, dlh_left, dlh_right, mas_particle;
+
+	double border_length = 2.5 * h;
+	double X_cube = 1.0, Y_cube = 0.8, Z_cube = 0.8;
+
+	e_left = 2.5;
+	e_right = 2.0;
+	rho_left = 1.0;
+	rho_right = 1.0;
+	p_left = Eq_State(rho_left, e_left, Type_of_state, 1.4, 1.0);
+	p_right = Eq_State(rho_right, e_right, Type_of_state, 1.4, 1.0);
+
+
+	mas_particle = 1.0 / (Particle_on_length * Particle_on_length * Particle_on_length);
+	dlh_left = pow(mas_particle / rho_left, 1 / 3.0);
+	dlh_right = pow(mas_particle / rho_right, 1 / 3.0);
+
+	p = -1;
+
+	Im = int((0.0 - X_min) / dlh_left) + 1;
+	Jm = int((Y_max - Y_min) / dlh_left) + 1;
+	Km = int((Z_max - Z_min) / dlh_left) + 1;
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = 0.0 - (double)(i * dlh_left);
+				y_temp = Y_min + (double)(j * dlh_left);
+				z_temp = Z_min + (double)(k * dlh_left);
+				if ((abs(x_temp) <= X_cube) && (abs(y_temp) <= Y_cube) && (abs(z_temp) <= Z_cube))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					e_gas[p] = e_left;
+					p_gas[p] = p_left;
+					rho_gas[p] = rho_left;
+					mas_gas[p] = mas_particle;
+				}
+				if ((abs(x_temp) <= X_cube - border_length) && (abs(y_temp) <= X_cube - border_length) && (abs(z_temp) <= Z_cube - border_length))
+				{
+					Ind_gas[p] = 0;
+				}
+				else
+				{
+					Ind_gas[p] = 1;
+				}
+
+
+			};
+
+	Im = int((X_max - 0.0) / dlh_right) + 1;
+	Jm = int((Y_max - Y_min) / dlh_right) + 1;
+	Km = int((Z_max - Z_min) / dlh_right) + 1;
+
+	for (i = 0; i <= Im; i++)
+		for (j = 0; j <= Jm; j++)
+			for (k = 0; k <= Km; k++)
+			{
+				x_temp = dlh_right + (double)(i * dlh_right);
+				y_temp = Y_min + (double)(j * dlh_right);
+				z_temp = Z_min + (double)(k * dlh_right);
+				if ((abs(x_temp) <= X_cube) && (abs(y_temp) <= Y_cube) && (abs(z_temp) <= Z_cube))
+				{
+					p = p + 1;
+					x_gas[p] = x_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					y_gas[p] = y_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					z_gas[p] = z_temp;// + (rand()%100-50.0)/100000.0 * dlh;
+					Vx_gas[p] = 0.0;
+					Vy_gas[p] = 0.0;
+					Vz_gas[p] = 0.0;
+					Ax_gas[p] = 0.0;
+					Ay_gas[p] = 0.0;
+					Az_gas[p] = 0.0;
+					e_gas[p] = e_right;
+					p_gas[p] = p_right;
+					rho_gas[p] = rho_right;
+					mas_gas[p] = mas_particle;
+				}
+				if ((abs(x_temp) <= X_cube - border_length) && (abs(y_temp) <= X_cube - border_length) && (abs(z_temp) <= Z_cube - border_length))
+				{
+					Ind_gas[p] = 0;
+				}
+				else
+				{
+					Ind_gas[p] = 1;
+				}
+
+			};
+
+
+	Pr = p;
+
+	Pm = p;
+
+	//Num_dust_sort = 2;
+	Coeff_h_dust_cell = 0.5;
+	mas_gas_dust_1 = 0.75;
+	R_dust_1 = 0.01;
+	mas_gas_dust_2 = 0.5;
+	R_dust_2 = 1.0;
+
+
+	x_dust_1 = new double[Pm + 1];
+	y_dust_1 = new double[Pm + 1];
+	z_dust_1 = new double[Pm + 1];
+	h_dust_1 = new double[Pm + 1];
+	mas_dust_1 = new double[Pm + 1];
+	rho_dust_1 = new double[Pm + 1];
+	Vx_dust_1 = new double[Pm + 1];
+	Vy_dust_1 = new double[Pm + 1];
+	Vz_dust_1 = new double[Pm + 1];
+	Ax_dust_1 = new double[Pm + 1];
+	Ay_dust_1 = new double[Pm + 1];
+	Az_dust_1 = new double[Pm + 1];
+	ind_dust_1 = new int[Pm + 1];
+	t_stop_1 = new double[Pm + 1];
+	Nn_dust_1 = new int[Pm + 1]; // Number of next particle in cell
+	Cell_dust_1 = new int[Number_of_fihd_cells + 1]; // Number of first particle
+	Ne_dust_1 = new int[Number_of_fihd_cells + 1]; //  Number of last particle
+
+	x_dust_2 = new double[Pm + 1];
+	y_dust_2 = new double[Pm + 1];
+	z_dust_2 = new double[Pm + 1];
+	h_dust_2 = new double[Pm + 1];
+	mas_dust_2 = new double[Pm + 1];
+	rho_dust_2 = new double[Pm + 1];
+	Vx_dust_2 = new double[Pm + 1];
+	Vy_dust_2 = new double[Pm + 1];
+	Vz_dust_2 = new double[Pm + 1];
+	Ax_dust_2 = new double[Pm + 1];
+	Ay_dust_2 = new double[Pm + 1];
+	Az_dust_2 = new double[Pm + 1];
+	ind_dust_2 = new int[Pm + 1];
+	t_stop_2 = new double[Pm + 1];
+	Nn_dust_2 = new int[Pm + 1]; // Number of next particle in cell
+	Cell_dust_2 = new int[Number_of_fihd_cells + 1]; // Number of first particle
+	Ne_dust_2 = new int[Number_of_fihd_cells + 1]; //  Number of last particle
+
+
+	for (p = 0; p <= Pm; p++)
+	{
+
+		x_dust_1[p] = x_gas[p];
+		y_dust_1[p] = y_gas[p];
+		z_dust_1[p] = z_gas[p];
+		h_dust_1[p] = h;
+		mas_dust_1[p] = mas_gas[p] * mas_gas_dust_1;
+		rho_dust_1[p] = rho_gas[p] * mas_gas_dust_1;
+		Vx_dust_1[p] = 0.0;
+		Vy_dust_1[p] = 0.0;
+		Vz_dust_1[p] = 0.0;
+		Ax_dust_1[p] = 0.0;
+		Ay_dust_1[p] = 0.0;
+		Az_dust_1[p] = 0.0;
+		ind_dust_1[p] = Ind_gas[p];
+		t_stop_1[p] = Eq_t_stop(R_dust_1, p_gas[p], rho_gas[p], Gam_g);
+
+		x_dust_2[p] = x_gas[p];
+		y_dust_2[p] = y_gas[p];
+		z_dust_2[p] = z_gas[p];
+		h_dust_2[p] = h;
+		mas_dust_2[p] = mas_gas[p] * mas_gas_dust_2;
+		rho_dust_2[p] = rho_gas[p] * mas_gas_dust_2;
+		Vx_dust_2[p] = 0.0;
+		Vy_dust_2[p] = 0.0;
+		Vz_dust_2[p] = 0.0;
+		Ax_dust_2[p] = 0.0;
+		Ay_dust_2[p] = 0.0;
+		Az_dust_2[p] = 0.0;
+		ind_dust_2[p] = Ind_gas[p];
+		t_stop_2[p] = Eq_t_stop(R_dust_2, p_gas[p], rho_gas[p], Gam_g);
+
+	}
+
+	average_cell_width = Coeff_h_dust_cell * h;
+	Number_of_average_cell_x = int((X_max - X_min) / average_cell_width);
+	Number_of_average_cell_y = int((Y_max - Y_min) / average_cell_width);
+	Number_of_average_cell_z = int((Z_max - Z_min) / average_cell_width);
+
+	Number_of_average_cell = (Number_of_average_cell_x + 1) * (Number_of_average_cell_y + 1) * (Number_of_average_cell_z + 1);
+	//	x_dust_cell = new double[Number_of_dust_cell + 1];
+	//	y_dust_cell = new double[Number_of_dust_cell + 1];
+	//	z_dust_cell = new double[Number_of_dust_cell + 1];
+
+	Vx_g_average = new double[Number_of_average_cell + 1];
+	Vy_g_average = new double[Number_of_average_cell + 1];
+	Vz_g_average = new double[Number_of_average_cell + 1];
+	rho_g_average = new double[Number_of_average_cell + 1];
+	e_g_average = new double[Number_of_average_cell + 1];
+	g_average_count = new int[Number_of_average_cell + 1];
+	Psi_av_new_x = new double[Number_of_average_cell + 1];
+	Psi_av_new_y = new double[Number_of_average_cell + 1];
+	Psi_av_new_z = new double[Number_of_average_cell + 1];
+	v_av_new = new double[Number_of_average_cell + 1];
+	y_av_new_x = new double[Number_of_average_cell + 1];
+	y_av_new_y = new double[Number_of_average_cell + 1];
+	y_av_new_z = new double[Number_of_average_cell + 1];
+	y_av_x = new double[Number_of_average_cell + 1];
+	y_av_y = new double[Number_of_average_cell + 1];
+	y_av_z = new double[Number_of_average_cell + 1];
+	beta_cell = new double[Number_of_average_cell + 1];
+
+	Vx_d_average_1 = new double[Number_of_average_cell + 1];
+	Vy_d_average_1 = new double[Number_of_average_cell + 1];
+	Vz_d_average_1 = new double[Number_of_average_cell + 1];
+	rho_d_average_1 = new double[Number_of_average_cell + 1];
+	eps_cell_1 = new double[Number_of_average_cell + 1];
+	d_average_count_1 = new int[Number_of_average_cell + 1];
+	t_stop_average_1 = new double[Number_of_average_cell + 1];
+	x_av_new_x_1 = new double[Number_of_average_cell + 1];
+	x_av_new_y_1 = new double[Number_of_average_cell + 1];
+	x_av_new_z_1 = new double[Number_of_average_cell + 1];
+	x_av_x_1 = new double[Number_of_average_cell + 1];
+	x_av_y_1 = new double[Number_of_average_cell + 1];
+	x_av_z_1 = new double[Number_of_average_cell + 1];
+	u_av_new_1 = new double[Number_of_average_cell + 1];
+	b_cell_1 = new double[Number_of_average_cell + 1];
+
+	Vx_d_average_2 = new double[Number_of_average_cell + 1];
+	Vy_d_average_2 = new double[Number_of_average_cell + 1];
+	Vz_d_average_2 = new double[Number_of_average_cell + 1];
+	rho_d_average_2 = new double[Number_of_average_cell + 1];
+	eps_cell_2 = new double[Number_of_average_cell + 1];
+	d_average_count_2 = new int[Number_of_average_cell + 1];
+	t_stop_average_2 = new double[Number_of_average_cell + 1];
+	x_av_new_x_2 = new double[Number_of_average_cell + 1];
+	x_av_new_y_2 = new double[Number_of_average_cell + 1];
+	x_av_new_z_2 = new double[Number_of_average_cell + 1];
+	x_av_x_2 = new double[Number_of_average_cell + 1];
+	x_av_y_2 = new double[Number_of_average_cell + 1];
+	x_av_z_2 = new double[Number_of_average_cell + 1];
+	u_av_new_2 = new double[Number_of_average_cell + 1];
+	b_cell_2 = new double[Number_of_average_cell + 1];
+
+	for (i = 0; i <= Number_of_average_cell; i++)
+	{
+		//x_dust_cell[i] = (double) X_min + i * cell_dust_width;
+		//x_dust_cell[i] = (double) Y_min + i * cell_dust_width;
+		//z_dust_cell[i] = (double) Y_min + i * cell_dust_width;
+		Vx_g_average[i] = 0.0;
+		Vy_g_average[i] = 0.0;
+		Vz_g_average[i] = 0.0;
+		rho_g_average[i] = 0.0;
+		e_g_average[i] = 0.0;
+		g_average_count[i] = 0;
+		Psi_av_new_x[i] = 0.0;
+		Psi_av_new_y[i] = 0.0;
+		Psi_av_new_z[i] = 0.0;
+		v_av_new[i] = 0.0;
+		y_av_new_x[i] = 0.0;
+		y_av_new_y[i] = 0.0;
+		y_av_new_y[i] = 0.0;
+		y_av_x[i] = 0.0;
+		y_av_y[i] = 0.0;
+		y_av_z[i] = 0.0;
+
+		Vx_d_average_1[i] = 0.0;
+		Vy_d_average_1[i] = 0.0;
+		Vz_d_average_1[i] = 0.0;
+		rho_d_average_1[i] = 0.0;
+		eps_cell_1[i] = 0.0;
+		t_stop_average_1[i] = 0.0;
+		d_average_count_1[i] = 0;
+		x_av_new_x_1[i] = 0.0;
+		x_av_new_y_1[i] = 0.0;
+		x_av_new_z_1[i] = 0.0;
+		x_av_x_1[i] = 0.0;
+		x_av_y_1[i] = 0.0;
+		x_av_z_1[i] = 0.0;
+		u_av_new_1[i] = 0.0;
+		b_cell_1[i] = 0.0;
+
+		Vx_d_average_2[i] = 0.0;
+		Vy_d_average_2[i] = 0.0;
+		Vz_d_average_2[i] = 0.0;
+		rho_d_average_2[i] = 0.0;
+		eps_cell_2[i] = 0.0;
+		t_stop_average_2[i] = 0.0;
+		d_average_count_2[i] = 0;
+		x_av_new_x_2[i] = 0.0;
+		x_av_new_y_2[i] = 0.0;
+		x_av_new_z_2[i] = 0.0;
+		x_av_x_2[i] = 0.0;
+		x_av_y_2[i] = 0.0;
+		x_av_z_2[i] = 0.0;
+		u_av_new_2[i] = 0.0;
+		b_cell_2[i] = 0.0;
+
+	}
+
+}
+
+
 int main()
 
 {
@@ -1481,8 +1787,8 @@ int main()
 	//  init_Sod_X();
 	// init_Sod_X_mas();
 	// init_Sod_X_e();
-	init_Dust_Ball();
-
+	// init_Dust_Ball();
+	init_Sod_X_Dust();
 
 	cudaSetDevice(1);
 
@@ -1945,11 +2251,6 @@ int main()
 		cudaMemcpy(Psi_av_new_y, dev_Psi_av_new_y, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(Psi_av_new_z, dev_Psi_av_new_z, (Number_of_average_cell + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 
-
-		EnergyKernel_IDIC << <gridSize, blockSize >> > (dev_e_gas, dev_e_temp, dev_ind_gas, tau, Pm);
-		cudaDeviceSynchronize();
-
-		cudaMemcpy(e_gas, dev_e_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 */
 
 		Force_InitKernel_IDIC << <gridSize, blockSize >> > (dev_Ax_gas, dev_Ay_gas, dev_Az_gas, dev_ind_gas, Pm);
@@ -2215,7 +2516,11 @@ int main()
 		cudaMemcpy(y_dust_2, dev_y_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		cudaMemcpy(z_dust_2, dev_z_dust_2, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 
+		
+		EnergyKernel_IDIC << <gridSize, blockSize >> > (dev_e_gas, dev_e_temp, dev_ind_gas, tau, Pm);
+		cudaDeviceSynchronize();
 
+		cudaMemcpy(e_gas, dev_e_gas, (Pm + 1) * sizeof(double), cudaMemcpyDeviceToHost);
 		
 
 
